@@ -1,0 +1,5 @@
+/packages.config
+/packages/
+/obj/
+/bin/
+/.idea/
