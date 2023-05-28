@@ -24,18 +24,16 @@ public class QuestionAndAnswer
         Effect = effect;
         Answer = answer;
     }
-
-    public QuestionAndAnswer(string question, QuestionEffect effect, string answer, string[] questionReplacements, string[] answerReplacements)
+    public QuestionAndAnswer(string question, QuestionEffect effect, string answer, string[]? questionReplacements,string[]? answerReplacements)
     {
         Question = question;
         Answer = answer;
         Effect = effect;
-        StringFormat(questionReplacements, answerReplacements);
+        StringFormat(questionReplacements,answerReplacements);
     }
-
-    private void StringFormat(string[] questionReplacements, string[] answerReplacements)
+    private void StringFormat(string[]? questionReplacements,string[]? answerReplacements)
     {
-        String.Format(Question, questionReplacements);
-        String.Format(Answer, answerReplacements);
+        if (questionReplacements != null) { string.Format(Question, questionReplacements); }
+        if(answerReplacements != null){ string.Format(Answer, answerReplacements); }
     }
 }
