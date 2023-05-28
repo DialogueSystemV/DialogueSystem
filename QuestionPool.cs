@@ -40,5 +40,9 @@ public class QuestionPool
         return IsValidIndex(index) ? Pool[index].Effect : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {Pool.Count - 1}");
     }
 
+    internal void RemoveQuestionAnswer(int index)
+    {
+        Pool.RemoveAt(index);
+    }
     public bool IsValidIndex(int index) => index < Pool.Count;
 }

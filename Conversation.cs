@@ -88,21 +88,47 @@ public class Conversation
         }
         return indexPressed;
     }
-    
+
     /// <summary>
     /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
     /// </summary>
-    public void Run()
+    public void Run(bool remove = false)
+    {
+        if (!remove)
+        {
+            GameFiber.StartNew(delegate
+            {
+                foreach (QuestionPool q in Dialogue)
+                {
+                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
+                    int indexPressed = WaitForValidKeyPress(q);
+                    Game.HideHelp();
+                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
+                    UpdateNumbers(q.GetEffect(indexPressed));
+                }
+            });
+        }
+        else
+        {
+            RunRemoveAfterEachQuestion();
+        }
+    }
+
+    private void RunRemoveAfterEachQuestion()
     {
         GameFiber.StartNew(delegate
         {
             foreach (QuestionPool q in Dialogue)
             {
-                Game.DisplayHelp(q.DisplayQuestions(),10000);
-                int indexPressed = WaitForValidKeyPress(q);
-                Game.HideHelp();
-                Game.DisplaySubtitle(q.GetAnswer(indexPressed));
-                UpdateNumbers(q.GetEffect(indexPressed));
+                while (q.Pool.Count > 0)
+                {
+                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
+                    int indexPressed = WaitForValidKeyPress(q);
+                    Game.HideHelp();
+                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
+                    UpdateNumbers(q.GetEffect(indexPressed));
+                    q.RemoveQuestionAnswer(indexPressed);
+                }
             }
         });
     }
