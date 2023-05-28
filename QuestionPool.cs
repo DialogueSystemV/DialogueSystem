@@ -6,31 +6,39 @@ namespace DialogueSystem;
 
 public class QuestionPool
 {
-    public List<QuestionAndAnswer> pool { get; set; }
-    public QuestionPool(List<QuestionAndAnswer> pool)
+    public List<QuestionAndAnswer> Pool { get; set; }
+    public QuestionPool(List<QuestionAndAnswer> pool, params string[] stringsToBeFormattedIn)
     {
-        this.pool = pool;
+        Pool = pool;
     }
 
     public string DisplayQuestions()
     {
         string displaystr = "";
-        for(int i = 0; i< pool.Count; i++)
+        for(int i = 0; i< Pool.Count; i++)
         {
-            displaystr += $"[{i}]: {pool[i].question}\n";
+            displaystr += $"[{i}]: {Pool[i].Question}\n";
         }
         return displaystr;
     }
 
+    private void FormatDialogue(string[] toBeFormattedIn)
+    {
+        for(int i = 0; i < toBeFormattedIn.Length; i++)
+        {
+            
+        }
+    }
+    
     public string GetAnswer(int index)
     {
-        return IsValidIndex(index) ? pool[index].answer : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {pool.Count - 1}");
+        return IsValidIndex(index) ? Pool[index].Answer : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {Pool.Count - 1}");
     }
             
     public QuestionEffect GetEffect(int index)
     {
-        return IsValidIndex(index) ? pool[index].effect : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {pool.Count - 1}");
+        return IsValidIndex(index) ? Pool[index].Effect : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {Pool.Count - 1}");
     }
 
-    public bool IsValidIndex(int index) => index < pool.Count;
+    public bool IsValidIndex(int index) => index < Pool.Count;
 }

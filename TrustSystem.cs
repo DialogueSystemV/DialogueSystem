@@ -9,27 +9,27 @@ public class TrustSystem
     /// <summary>
     /// Conversation the trust system will grab the information from.
     /// </summary>
-    public Conversation conversation { get; set; }
+    public Conversation Conversation { get; set; }
     
     /// <summary>
     /// A dictionary in order to apply different weightages to the different question effects.
     /// </summary>
-    public Dictionary<QuestionEffect, int> effectValues { get; set; }
+    public Dictionary<QuestionEffect, int> EffectValues { get; set; }
     
     /// <summary>
     /// The negative threshold will be inclusive and determines whether the final effect of the conversation is negative or neutral.
     /// </summary>
-    public int negativeThreshold { get; set; }
+    public int NegativeThreshold { get; set; }
     /// <summary>
     /// The positive threshold will be inclusive and determines whether the final effect of the conversation is positive or neutral.
     /// </summary>
-    public int positiveThreshold { get; set; }
+    public int PositiveThreshold { get; set; }
     
     /// <summary>
     /// This is the starting trust level that the player and the person the player is talking to will have.
     /// This will have to be a starting amount that makes context with negativeThreshold and positiveThreshold.
     /// </summary>
-    public int trustLevel { get; set; }
+    public int TrustLevel { get; set; }
 
     
     /// <summary>
@@ -43,27 +43,27 @@ public class TrustSystem
     /// This will have to be a starting amount that makes context with negativeThreshold and positiveThreshold.</param>
     public TrustSystem(Conversation conversation, int[] effectArray, int positiveThreshold, int negativeThreshold, int trustLevel)
     {
-        this.conversation = conversation;
-        this.trustLevel = trustLevel;
-        this.positiveThreshold = positiveThreshold;
-        this.negativeThreshold = negativeThreshold;
-        effectValues = new Dictionary<QuestionEffect, int>()
+        Conversation = conversation;
+        TrustLevel = trustLevel;
+        PositiveThreshold = positiveThreshold;
+        NegativeThreshold = negativeThreshold;
+        EffectValues = new Dictionary<QuestionEffect, int>()
         {
-            { QuestionEffect.NEGATIVE, effectArray[0] },
-            { QuestionEffect.NEUTRAL, effectArray[1] },
-            { QuestionEffect.POSITIVE, effectArray[2] },
+            { QuestionEffect.Negative, effectArray[0] },
+            { QuestionEffect.Neutral, effectArray[1] },
+            { QuestionEffect.Positive, effectArray[2] },
         };
     }
     
     private void CalculateFinalTrustLevel()
     {
-        int pos = conversation.numberOfPositive;
-        int neg = conversation.numberOfNegative;
-        int neutral = conversation.numberOfNeutral;
+        int pos = Conversation.NumberOfPositive;
+        int neg = Conversation.NumberOfNegative;
+        int neutral = Conversation.NumberOfNeutral;
 
-        trustLevel += (pos * effectValues[QuestionEffect.POSITIVE]);
-        trustLevel += (neutral * effectValues[QuestionEffect.NEUTRAL]);
-        trustLevel += (neg * effectValues[QuestionEffect.NEGATIVE]);
+        TrustLevel += (pos * EffectValues[QuestionEffect.Positive]);
+        TrustLevel += (neutral * EffectValues[QuestionEffect.Neutral]);
+        TrustLevel += (neg * EffectValues[QuestionEffect.Negative]);
     }
     
     /// <summary>
@@ -74,17 +74,17 @@ public class TrustSystem
     public QuestionEffect CalculateFinalEffect()
     {
         CalculateFinalTrustLevel();
-        if (trustLevel <= negativeThreshold)
+        if (TrustLevel <= NegativeThreshold)
         {
-            return QuestionEffect.NEGATIVE;
+            return QuestionEffect.Negative;
         }
-        else if (trustLevel < positiveThreshold && trustLevel > negativeThreshold)
+        else if (TrustLevel < PositiveThreshold && TrustLevel > NegativeThreshold)
         {
-            return QuestionEffect.NEUTRAL;
+            return QuestionEffect.Neutral;
         }
         else
         {
-            return QuestionEffect.POSITIVE;
+            return QuestionEffect.Positive;
         }
     }
 
@@ -99,28 +99,28 @@ public class TrustSystem
     {
         CalculateFinalTrustLevel();
         QuestionEffect calculatedEffect;
-        if (trustLevel <= negativeThreshold)
+        if (TrustLevel <= NegativeThreshold)
         {
-            calculatedEffect = QuestionEffect.NEGATIVE;
+            calculatedEffect = QuestionEffect.Negative;
         }
-        else if (trustLevel < positiveThreshold && trustLevel > negativeThreshold)
+        else if (TrustLevel < PositiveThreshold && TrustLevel > NegativeThreshold)
         {
-            calculatedEffect = QuestionEffect.NEUTRAL;
+            calculatedEffect = QuestionEffect.Neutral;
         }
         else
         {
-            calculatedEffect = QuestionEffect.POSITIVE;
+            calculatedEffect = QuestionEffect.Positive;
         }
         
         switch (calculatedEffect)
         {
-            case QuestionEffect.POSITIVE:
+            case QuestionEffect.Positive:
                 arrayOfEffects[2]();
                 break;
-            case QuestionEffect.NEUTRAL:
+            case QuestionEffect.Neutral:
                 arrayOfEffects[1]();
                 break;
-            case QuestionEffect.NEGATIVE:
+            case QuestionEffect.Negative:
                 arrayOfEffects[0]();
                 break;
         }

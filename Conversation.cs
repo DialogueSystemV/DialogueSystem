@@ -12,26 +12,26 @@ public class Conversation
     /// <summary>
     /// Number of positive questions asked by the player. The starting value is 0.
     /// </summary>
-    public int numberOfPositive { get; private set; }
+    public int NumberOfPositive { get; private set; }
     /// <summary>
     /// Number of negative questions asked by the player. The starting value is 0.
     /// </summary>
-    public int numberOfNegative { get; private set; }
+    public int NumberOfNegative { get; private set; }
     /// <summary>
     /// Number of neutral questions asked by the player. The starting value is 0.
     /// </summary>
-    public int numberOfNeutral { get; private set; }
+    public int NumberOfNeutral { get; private set; }
     /// <summary>
     /// List of question pools. This will be looped through in the Run() method.
     /// </summary>
-    public List<QuestionPool> dialouge { get; set; }
+    public List<QuestionPool> Dialogue { get; set; }
     
-    private static Keys[] validKeys = new[]
+    private static Keys[] _validKeys = new[]
     {
         Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9
     };
     
-    private static Keys[] numpadKeys = new[]
+    private static Keys[] _numpadKeys = new[]
     {
         Keys.NumPad0,Keys.NumPad1,Keys.NumPad2,Keys.NumPad3,Keys.NumPad4,Keys.NumPad5,Keys.NumPad6,Keys.NumPad7,Keys.NumPad8,Keys.NumPad9
     };
@@ -41,15 +41,15 @@ public class Conversation
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(List<QuestionPool> dialouge,bool useNumpadKeys)
+    public Conversation(List<QuestionPool> dialogue,bool useNumpadKeys)
     {
-        this.dialouge = dialouge;
-        numberOfNegative = 0;
-        numberOfNeutral = 0;
-        numberOfPositive = 0;
+        this.Dialogue = dialogue;
+        NumberOfNegative = 0;
+        NumberOfNeutral = 0;
+        NumberOfPositive = 0;
         if (useNumpadKeys)
         {
-            validKeys = numpadKeys;
+            _validKeys = _numpadKeys;
         }
     }
     
@@ -57,14 +57,14 @@ public class Conversation
     {
         switch (effect)
         {
-            case QuestionEffect.POSITIVE:
-                numberOfPositive++;
+            case QuestionEffect.Positive:
+                NumberOfPositive++;
                 break;
-            case QuestionEffect.NEUTRAL:
-                numberOfNeutral++;
+            case QuestionEffect.Neutral:
+                NumberOfNeutral++;
                 break;
-            case QuestionEffect.NEGATIVE:
-                numberOfNegative++;
+            case QuestionEffect.Negative:
+                NumberOfNegative++;
                 break;
         }
     }
@@ -76,9 +76,9 @@ public class Conversation
         while (!isValidKeyPressed)
         {
             GameFiber.Yield();
-            for (int i = 0; i < validKeys.Length; i++)
+            for (int i = 0; i < _validKeys.Length; i++)
             {
-                Keys key = validKeys[i];
+                Keys key = _validKeys[i];
                 if (Game.IsKeyDown(key) && q.IsValidIndex(i))
                 {
                     isValidKeyPressed = true;
@@ -96,7 +96,7 @@ public class Conversation
     {
         GameFiber.StartNew(delegate
         {
-            foreach (QuestionPool q in dialouge)
+            foreach (QuestionPool q in Dialogue)
             {
                 Game.DisplayHelp(q.DisplayQuestions(),10000);
                 int indexPressed = WaitForValidKeyPress(q);
@@ -115,9 +115,9 @@ public class Conversation
     /// <param name="q">Question pool the questions will be grabbed from</param>
     public void AddQuestionsToMenu(UIMenu menu, QuestionPool q)
     {
-        foreach (QuestionAndAnswer qanda in q.pool)
+        foreach (QuestionAndAnswer qanda in q.Pool)
         {
-            menu.AddItem(new UIMenuItem(qanda.question));
+            menu.AddItem(new UIMenuItem(qanda.Question));
         }
     }
     

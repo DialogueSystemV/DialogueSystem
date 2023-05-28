@@ -2,7 +2,7 @@ namespace DialogueSystem;
 
 public enum QuestionEffect
 {
-    POSITIVE,
-    NEUTRAL,
-    NEGATIVE
+    Positive,
+    Neutral,
+    Negative
 }
