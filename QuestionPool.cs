@@ -21,15 +21,6 @@ public class QuestionPool
         }
         return displaystr;
     }
-
-    private void FormatDialogue(string[] toBeFormattedIn)
-    {
-        for(int i = 0; i < toBeFormattedIn.Length; i++)
-        {
-            
-        }
-    }
-    
     public string GetAnswer(int index)
     {
         return IsValidIndex(index) ? Pool[index].Answer : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {Pool.Count - 1}");
