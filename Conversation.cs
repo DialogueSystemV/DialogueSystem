@@ -35,7 +35,8 @@ public class Conversation
     {
         Keys.NumPad0,Keys.NumPad1,Keys.NumPad2,Keys.NumPad3,Keys.NumPad4,Keys.NumPad5,Keys.NumPad6,Keys.NumPad7,Keys.NumPad8,Keys.NumPad9
     };
-    
+
+    private GameFiber conversation;
     /// <summary>
     /// Initializes an instance of the Conversation object 
     /// </summary>
@@ -96,7 +97,8 @@ public class Conversation
     {
         if (!remove)
         {
-            GameFiber.StartNew(delegate
+            
+            conversation = GameFiber.StartNew(delegate
             {
                 foreach (QuestionPool q in Dialogue)
                 {
@@ -116,7 +118,7 @@ public class Conversation
 
     private void RunRemoveAfterEachQuestion()
     {
-        GameFiber.StartNew(delegate
+        conversation = GameFiber.StartNew(delegate
         {
             foreach (QuestionPool q in Dialogue)
             {
@@ -131,6 +133,12 @@ public class Conversation
                 }
             }
         });
+    }
+
+    public void InterruptConversation()
+    {
+        Game.HideHelp();
+        if(conversation.IsAlive) {conversation.Abort();}
     }
     
     
