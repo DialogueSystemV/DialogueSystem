@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DialogueSystem;
+using Rage;
 
 namespace DialogueSystem;
 
@@ -13,6 +14,7 @@ public class TrustSystem
     
     /// <summary>
     /// A dictionary in order to apply different weightages to the different question effects.
+    /// Values should go in the order of: NEGATIVE, NEUTRAL, POSITIVE
     /// </summary>
     public Dictionary<QuestionEffect, int> EffectValues { get; set; }
     
@@ -30,6 +32,8 @@ public class TrustSystem
     /// This will have to be a starting amount that makes context with negativeThreshold and positiveThreshold.
     /// </summary>
     public int TrustLevel { get; set; }
+
+    public event EventHandler<QuestionEffect> OnTrustLevelChanged;
 
     
     /// <summary>
@@ -53,6 +57,7 @@ public class TrustSystem
             { QuestionEffect.Neutral, effectArray[1] },
             { QuestionEffect.Positive, effectArray[2] },
         };
+        CheckTrustLevel();
     }
     
     private void CalculateFinalTrustLevel()
@@ -125,4 +130,22 @@ public class TrustSystem
                 break;
         }
     }
+
+    private void CheckTrustLevel()
+    {
+        GameFiber.StartNew(delegate
+        {
+            QuestionEffect startingEffect = CalculateFinalEffect();
+            while (Conversation.ConversationThread.IsAlive)
+            {
+                var currEffect= CalculateFinalEffect();
+                if (currEffect != startingEffect)
+                {
+                    OnTrustLevelChanged?.Invoke(this, currEffect);
+                }
+            }
+        });
+    }
+    
+    
 }
