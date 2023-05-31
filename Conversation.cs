@@ -156,7 +156,8 @@ public class Conversation
     }
     
     /// <summary>
-    /// This method can be ran during the OnItemSelect event in RageNativeUI. This will display the answer to the question clicked and update the number of question integers accordingly.
+    /// This method can be ran during the OnItemSelect event in RageNativeUI.
+    /// This will display the answer to the question clicked and update the number of question integers accordingly.
     /// </summary>
     /// <param name="index">Index of menu button selected</param>
     /// <param name="q">Question pool that the question was asked from</param>
