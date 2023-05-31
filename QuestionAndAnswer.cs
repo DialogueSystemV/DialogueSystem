@@ -1,5 +1,4 @@
 using System;
-
 namespace DialogueSystem;
 
 public class QuestionAndAnswer
@@ -17,23 +16,16 @@ public class QuestionAndAnswer
     /// Answer that suspect will give
     /// </summary>
     public string Answer { get; set; }
-
     public QuestionAndAnswer(string question, QuestionEffect effect, string answer)
     {
         Question = question;
         Effect = effect;
         Answer = answer;
     }
-    public QuestionAndAnswer(string question, QuestionEffect effect, string answer, string[]? questionReplacements,string[]? answerReplacements)
+    
+    internal void FormatString(string replaceString, string valueToBeReplaced)
     {
-        Question = question;
-        Answer = answer;
-        Effect = effect;
-        StringFormat(questionReplacements,answerReplacements);
-    }
-    private void StringFormat(string[]? questionReplacements,string[]? answerReplacements)
-    {
-        if (questionReplacements != null) { string.Format(Question, questionReplacements); }
-        if(answerReplacements != null){ string.Format(Answer, answerReplacements); }
+        Question = Question.Replace(valueToBeReplaced, replaceString);
+        Answer  = Answer.Replace(valueToBeReplaced, replaceString);
     }
 }
