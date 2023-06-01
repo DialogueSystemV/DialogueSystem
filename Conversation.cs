@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Rage;
 using RAGENativeUI;
@@ -93,37 +94,39 @@ public class Conversation
     /// <summary>
     /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
     /// </summary>
-    public void Run(bool remove = false)
+    public void Run(bool remove = false, int numberOfQuestionsToAskPerPool = 1)
     {
         if (!remove)
         {
-            
-            ConversationThread = GameFiber.StartNew(delegate
+            RunRemoveAfterEachQuestion(numberOfQuestionsToAskPerPool);
+            return;
+        }
+        ConversationThread = GameFiber.StartNew(delegate
+        {
+            foreach (QuestionPool q in Dialogue)
             {
-                foreach (QuestionPool q in Dialogue)
+                for (int i = 0; i < numberOfQuestionsToAskPerPool; i++)
                 {
+                    if (q.Pool.Count == 0) {break;}
                     Game.DisplayHelp(q.DisplayQuestions(), 10000);
                     int indexPressed = WaitForValidKeyPress(q);
                     Game.HideHelp();
                     Game.DisplaySubtitle(q.GetAnswer(indexPressed));
                     UpdateNumbers(q.GetEffect(indexPressed));
                 }
-            });
+            }
+        });
         }
-        else
-        {
-            RunRemoveAfterEachQuestion();
-        }
-    }
 
-    private void RunRemoveAfterEachQuestion()
+    private void RunRemoveAfterEachQuestion(int numberOfQuestionsToAskPerPool)
     {
         ConversationThread = GameFiber.StartNew(delegate
         {
             foreach (QuestionPool q in Dialogue)
             {
-                while (q.Pool.Count > 0)
+                for (int i = 0; i < numberOfQuestionsToAskPerPool; i++)
                 {
+                    if (q.Pool.Count == 0) {break;}
                     Game.DisplayHelp(q.DisplayQuestions(), 10000);
                     int indexPressed = WaitForValidKeyPress(q);
                     Game.HideHelp();
@@ -161,9 +164,10 @@ public class Conversation
     /// </summary>
     /// <param name="index">Index of menu button selected</param>
     /// <param name="q">Question pool that the question was asked from</param>
-    public void OnItemSelect(int index, QuestionPool q)
+    public void OnItemSelect(int index, QuestionPool q, bool removeQuestion)
     {
         Game.DisplaySubtitle(q.GetAnswer(index));
         UpdateNumbers(q.GetEffect(index));
+        if(removeQuestion) q.RemoveQuestionAnswer(index);
     }
 }
