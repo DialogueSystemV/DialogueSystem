@@ -16,7 +16,7 @@ public class QuestionPool
         Pool = pool;
     }
 
-    public string DisplayQuestions()
+    internal string DisplayQuestions()
     {
         string displaystr = "";
         for(int i = 0; i< Pool.Count; i++)
