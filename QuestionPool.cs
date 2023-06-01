@@ -34,6 +34,10 @@ public class QuestionPool
     {
         return IsValidIndex(index) ? Pool[index].Effect : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {Pool.Count - 1}");
     }
+    public string GetQuestion(int index)
+    {
+        return IsValidIndex(index) ? Pool[index].Question : throw new ArgumentOutOfRangeException("index",$"Index is invalid. Index wanted: {index}. Max valid index: {Pool.Count - 1}");
+    }
 
     public void FormatStrings()
     {
