@@ -27,6 +27,8 @@ public class Conversation
     /// </summary>
     public List<QuestionPool> Dialogue { get; set; }
     
+    public event EventHandler<QuestionAndAnswer> OnQuestionSelected;
+    
     private static Keys[] _validKeys = new[]
     {
         Keys.D0, Keys.D1, Keys.D2, Keys.D3, Keys.D4, Keys.D5, Keys.D6, Keys.D7, Keys.D8, Keys.D9
@@ -110,6 +112,7 @@ public class Conversation
                     if (q.Pool.Count == 0) {break;}
                     Game.DisplayHelp(q.DisplayQuestions(), 10000);
                     int indexPressed = WaitForValidKeyPress(q);
+                    OnQuestionSelected?.Invoke(this,q.Pool[indexPressed]);
                     Game.HideHelp();
                     Game.DisplaySubtitle(q.GetAnswer(indexPressed));
                     UpdateNumbers(q.GetEffect(indexPressed));
@@ -129,6 +132,7 @@ public class Conversation
                     if (q.Pool.Count == 0) {break;}
                     Game.DisplayHelp(q.DisplayQuestions(), 10000);
                     int indexPressed = WaitForValidKeyPress(q);
+                    OnQuestionSelected?.Invoke(this,q.Pool[indexPressed]);
                     Game.HideHelp();
                     Game.DisplaySubtitle(q.GetAnswer(indexPressed));
                     UpdateNumbers(q.GetEffect(indexPressed));
@@ -166,6 +170,7 @@ public class Conversation
     /// <param name="q">Question pool that the question was asked from</param>
     public void OnItemSelect(int index, QuestionPool q, bool removeQuestion)
     {
+        OnQuestionSelected?.Invoke(this,q.Pool[index]);
         Game.DisplaySubtitle(q.GetAnswer(index));
         UpdateNumbers(q.GetEffect(index));
         if(removeQuestion) q.RemoveQuestionAnswer(index);
