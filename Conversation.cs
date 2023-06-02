@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Rage;
+using Rage.Native;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 
@@ -77,6 +78,7 @@ public class Conversation
     {
         bool isValidKeyPressed = false;
         int indexPressed = 0;
+        DisableControlAction(2,37,true);
         while (!isValidKeyPressed)
         {
             GameFiber.Yield();
@@ -87,9 +89,11 @@ public class Conversation
                 {
                     isValidKeyPressed = true;
                     indexPressed = i;
+                    break;
                 }
             }
         }
+        EnableControlAction(2,37,true);
         return indexPressed;
     }
 
@@ -174,5 +178,14 @@ public class Conversation
         Game.DisplaySubtitle(q.GetAnswer(index));
         UpdateNumbers(q.GetEffect(index));
         if(removeQuestion) q.RemoveQuestionAnswer(index);
+    }
+    
+    private void EnableControlAction(int control, int action, bool enable)
+    {
+        NativeFunction.Natives.ENABLE_CONTROL_ACTION(control, action, enable);
+    }
+    private void DisableControlAction(int control, int action, bool disable)
+    {
+        NativeFunction.Natives.DISABLE_CONTROL_ACTION(control, action, disable);
     }
 }
