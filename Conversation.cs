@@ -28,7 +28,7 @@ public class Conversation
     /// </summary>
     public List<QuestionPool> Dialogue { get; set; }
     
-    public event EventHandler<QuestionAndAnswer> OnQuestionSelected;
+    public event EventHandler<QuestionAndAnswer> OnQuestionSelect;
     
     private static Keys[] _validKeys = new[]
     {
@@ -99,8 +99,10 @@ public class Conversation
 
     /// <summary>
     /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
+    /// Each pool will iterate <paramref name="numberOfQuestionsToAskPerPool"/> times.
+    /// <param name="numberOfQuestionsToAskPerPool">number of times each pool will iterate</param>
     /// </summary>
-    public void Run(bool remove = false, int numberOfQuestionsToAskPerPool = 1)
+    public void Run(int numberOfQuestionsToAskPerPool, bool remove =false)
     {
         if (!remove)
         {
@@ -116,14 +118,42 @@ public class Conversation
                     if (q.Pool.Count == 0) {break;}
                     Game.DisplayHelp(q.DisplayQuestions(), 10000);
                     int indexPressed = WaitForValidKeyPress(q);
-                    OnQuestionSelected?.Invoke(this,q.Pool[indexPressed]);
+                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
                     Game.HideHelp();
                     Game.DisplaySubtitle(q.GetAnswer(indexPressed));
                     UpdateNumbers(q.GetEffect(indexPressed));
                 }
             }
         });
+    }
+    
+    /// <summary>
+    /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
+    /// </summary>
+    public void Run(bool remove =false)
+    {
+        if (!remove)
+        {
+            RunRemoveAfterEachQuestion();
+            return;
         }
+        ConversationThread = GameFiber.StartNew(delegate
+        {
+            foreach (QuestionPool q in Dialogue)
+            {
+                for (int i = 0; i < q.Pool.Count; i++)
+                {
+                    if (q.Pool.Count == 0) {break;}
+                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
+                    int indexPressed = WaitForValidKeyPress(q);
+                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
+                    Game.HideHelp();
+                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
+                    UpdateNumbers(q.GetEffect(indexPressed));
+                }
+            }
+        });
+    }
 
     private void RunRemoveAfterEachQuestion(int numberOfQuestionsToAskPerPool)
     {
@@ -136,7 +166,27 @@ public class Conversation
                     if (q.Pool.Count == 0) {break;}
                     Game.DisplayHelp(q.DisplayQuestions(), 10000);
                     int indexPressed = WaitForValidKeyPress(q);
-                    OnQuestionSelected?.Invoke(this,q.Pool[indexPressed]);
+                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
+                    Game.HideHelp();
+                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
+                    UpdateNumbers(q.GetEffect(indexPressed));
+                    q.RemoveQuestionAnswer(indexPressed);
+                }
+            }
+        });
+    }
+    private void RunRemoveAfterEachQuestion()
+    {
+        ConversationThread = GameFiber.StartNew(delegate
+        {
+            foreach (QuestionPool q in Dialogue)
+            {
+                for (int i = 0; i < q.Pool.Count; i++)
+                {
+                    if (q.Pool.Count == 0) {break;}
+                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
+                    int indexPressed = WaitForValidKeyPress(q);
+                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
                     Game.HideHelp();
                     Game.DisplaySubtitle(q.GetAnswer(indexPressed));
                     UpdateNumbers(q.GetEffect(indexPressed));
@@ -174,7 +224,7 @@ public class Conversation
     /// <param name="q">Question pool that the question was asked from</param>
     public void OnItemSelect(int index, QuestionPool q, bool removeQuestion)
     {
-        OnQuestionSelected?.Invoke(this,q.Pool[index]);
+        OnQuestionSelect?.Invoke(this,q.Pool[index]);
         Game.DisplaySubtitle(q.GetAnswer(index));
         UpdateNumbers(q.GetEffect(index));
         if(removeQuestion) q.RemoveQuestionAnswer(index);
