@@ -116,7 +116,7 @@ public class TrustSystem
         {
             calculatedEffect = QuestionEffect.Positive;
         }
-        
+        Conversation.InterruptConversation();
         switch (calculatedEffect)
         {
             case QuestionEffect.Positive:
