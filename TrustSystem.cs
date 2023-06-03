@@ -76,7 +76,7 @@ public class TrustSystem
     /// This should be only ran after the conversation has been ran or else the effect will be wrong.
     /// </summary>
     /// <returns>Overall QuestionEffect of the conversation that the trust system is grabbing information from</returns>
-    public QuestionEffect CalculateFinalEffect()
+    public QuestionEffect CalculateEffect()
     {
         CalculateFinalTrustLevel();
         if (TrustLevel <= NegativeThreshold)
@@ -135,10 +135,10 @@ public class TrustSystem
     {
         GameFiber.StartNew(delegate
         {
-            QuestionEffect startingEffect = CalculateFinalEffect();
+            QuestionEffect startingEffect = CalculateEffect();
             while (Conversation.ConversationThread.IsAlive)
             {
-                var currEffect= CalculateFinalEffect();
+                var currEffect= CalculateEffect();
                 if (currEffect != startingEffect)
                 {
                     OnTrustLevelChanged?.Invoke(this, currEffect);
