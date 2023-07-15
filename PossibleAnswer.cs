@@ -19,7 +19,7 @@ public class PossibleAnswer
         Condition = null;
         Ped = null;
         PerformActionIfChosen = null;
-        RemoveThoseQuestionsIfChosen = null;
+        RemoveThoseQuestionsIfChosen = new List<string>();
     }
     public PossibleAnswer(string answer, Predicate<Ped> Condition, Ped Ped)
     {
@@ -35,7 +35,7 @@ public class PossibleAnswer
         this.Condition = Condition;
         this.Ped = Ped;
         this.PerformActionIfChosen = PerformActionIfChosen;
-        RemoveThoseQuestionsIfChosen = null;
+        RemoveThoseQuestionsIfChosen = new List<string>();
     }
     public PossibleAnswer(string answer, Predicate<Ped> Condition, Ped Ped, Action<Ped> PerformActionIfChosen, List<string> RemoveThoseQuestionsIfChosen)
     {
@@ -45,4 +45,10 @@ public class PossibleAnswer
         this.PerformActionIfChosen = PerformActionIfChosen;
         this.RemoveThoseQuestionsIfChosen = RemoveThoseQuestionsIfChosen;
     }
+
+    internal void RunAction()
+    {
+        PerformActionIfChosen(Ped);
+    }
+    
 }

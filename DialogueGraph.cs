@@ -24,7 +24,7 @@ public class DialogueGraph
         }
     }
 
-    public void Link(string source, int index, Node destination)
+    public void LinkQuestionToNode(string source, int index, Node destination)
     {
         Node sourceNode = FindNode(source);
 
@@ -40,7 +40,7 @@ public class DialogueGraph
         sourceNode.OutgoingEdges[index] = destination;
     }
 
-    public Node FindNode(string identifier)
+    internal Node FindNode(string identifier)
     {
         return nodes.Find(node => node.Identifier == identifier);
     }
@@ -85,7 +85,7 @@ public class DialogueGraph
                     {
                         if(IsQuestionLinked(n.Identifier,i))
                         {
-                         RemoveLinks(n.Identifier, i);   
+                            RemoveLinks(n.Identifier, i);   
                         }
                         n.QuestionPool.Remove(qandas);
                     }
@@ -93,5 +93,16 @@ public class DialogueGraph
                 }
             }
         }
+    }
+
+    internal void AddQuestions(List<string> questionsToAdd)
+    {
+        throw new NotImplementedException();
+    }
+    
+    internal void OnQuestionChosen(PossibleAnswer chosenAnswer)
+    {
+        if(chosenAnswer.PerformActionIfChosen != null)  chosenAnswer.PerformActionIfChosen(Ped);
+        if(chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswer.RemoveThoseQuestionsIfChosen);
     }
 }

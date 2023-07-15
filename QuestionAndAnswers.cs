@@ -32,8 +32,15 @@ public class QuestionAndAnswers
         }
     }
 
-    internal string ChooseAnswer()
+    internal PossibleAnswer ChooseAnswer()
     {
-        return PossibleAnswers.FirstOrDefault(c => c.Condition != null ? c.Condition(c.Ped) : true).Answer ?? DefaultAnswer;
+        foreach (PossibleAnswer PA in PossibleAnswers)
+        {
+            if (PA.Condition != null && PA.Condition(PA.Ped))
+            {
+                return PA;
+            }
+        }
+        return new PossibleAnswer(DefaultAnswer);
     }
 }
