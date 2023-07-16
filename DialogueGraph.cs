@@ -10,9 +10,9 @@ public class DialogueGraph
     public List<Node> nodes;
     public Ped Ped;
 
-    public DialogueGraph(Ped ped)
+    public DialogueGraph(List<Node> nodes, Ped ped)
     {
-        nodes = new List<Node>();
+        this.nodes = nodes;
         Ped = ped;
     }
 
