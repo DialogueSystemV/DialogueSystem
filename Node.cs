@@ -15,4 +15,16 @@ public class Node
         QuestionPool = questionPool;
         OutgoingEdges = new Dictionary<int, Node>();
     }
+
+    internal string DisplayQuestions()
+    {
+        string displaystr = "";
+        for(int i = 0; i< QuestionPool.Count; i++)
+        {
+            displaystr += $"[{i}]: {QuestionPool[i].Question}\n";
+        }
+        return displaystr;
+    }
+    
+    internal bool IsValidIndex(int i) => i < QuestionPool.Count;
 }

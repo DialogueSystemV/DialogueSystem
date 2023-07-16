@@ -48,6 +48,7 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="Conversation.cs" />
         <Compile Include="DialogueGraph.cs" />
         <Compile Include="Node.cs" />
         <Compile Include="PossibleAnswer.cs" />

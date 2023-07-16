@@ -16,11 +16,14 @@ public class QuestionAndAnswers
     
     public string DefaultAnswer { get; set; }
     
-    public QuestionAndAnswers(string question, List<PossibleAnswer> possibleAnswers, string DefaultAnswer)
+    public bool EndsConversation { get; set; }
+    internal QuestionAndAnswers(){}
+    public QuestionAndAnswers(string question, List<PossibleAnswer> possibleAnswers, string DefaultAnswer, bool EndsConversation)
     {
-        this.Question = question;
+        Question = question;
         PossibleAnswers = possibleAnswers;
         this.DefaultAnswer = DefaultAnswer;
+        this.EndsConversation = EndsConversation;
     }
     
     internal void FormatString(string replaceString, string valueToBeReplaced)
@@ -41,6 +44,7 @@ public class QuestionAndAnswers
                 return PA;
             }
         }
-        return new PossibleAnswer(DefaultAnswer);
+        return new PossibleAnswer(DefaultAnswer, false);
     }
+    
 }

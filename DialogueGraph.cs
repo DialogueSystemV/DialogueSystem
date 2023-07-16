@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Rage;
 
 // ReSharper disable All
@@ -50,19 +51,34 @@ public class DialogueGraph
         return FindNode(NodeIdentifier).OutgoingEdges.ContainsKey(index);
     }
 
-    internal Node GetLinkedNode(string identifier, int index)
+    internal Node? GetLinkedNode(string identifier, int index)
     {
         Node node = FindNode(identifier);
         if (node == null)
         {
-            throw new ArgumentException("Node not found in the graph.");
+            return null;
         }
 
         if (node.OutgoingEdges.ContainsKey(index))
         {
             return node.OutgoingEdges[index];
         }
-        throw new ArgumentException("Index not found in the outgoing edges of the node.");
+
+        return null;
+    }
+    
+    internal void GetLinkedNode(string identifier, int index, Conversation convo)
+    {
+        Node node = FindNode(identifier);
+        if (node == null)
+        {
+            return;
+        }
+
+        if (node.OutgoingEdges.ContainsKey(index))
+        {
+            convo.currNode = node.OutgoingEdges[index];
+        }
     }
 
     internal void RemoveLinks(string identifier, int index)
@@ -102,7 +118,25 @@ public class DialogueGraph
     
     internal void OnQuestionChosen(PossibleAnswer chosenAnswer)
     {
-        if(chosenAnswer.PerformActionIfChosen != null)  chosenAnswer.PerformActionIfChosen(Ped);
+        if (chosenAnswer.PerformActionIfChosen != null) chosenAnswer.PerformActionIfChosen(Ped);
         if(chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswer.RemoveThoseQuestionsIfChosen);
+        // add AddQuestionsIfChosen here and to if statement below
+        if (chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0)
+        {
+            CheckForConversationEnders();
+        }
+    }
+
+    internal bool CheckForConversationEnders()
+    {
+        if (!nodes.Any(q =>
+                q.QuestionPool.Any(a => a.EndsConversation || a.PossibleAnswers.Any(pa => pa.EndsConversation))))
+        {
+            throw new InvalidOperationException(
+                "No nodes contain an answer or question that will end the conversation.");
+            return false;
+        }
+
+        return true;
     }
 }
