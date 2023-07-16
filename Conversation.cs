@@ -46,19 +46,22 @@ public class Conversation
 
     private bool IsGraphValid;
 
+    internal bool EndNaturally;
+
     /// <summary>
     /// Initializes an instance of the Conversation object 
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(DialogueGraph graph)
+    public Conversation(DialogueGraph graph, bool EndNaturally)
     {
         Graph = graph;
         NumberOfNegative = 0;
         NumberOfNeutral = 0;
         NumberOfPositive = 0;
         currNode = Graph.nodes[0];
-        IsGraphValid = graph.CheckForConversationEnders();
+        this.EndNaturally = EndNaturally;
+        if(EndNaturally) IsGraphValid = graph.CheckForConversationEnders();
     }
     
     
@@ -67,7 +70,7 @@ public class Conversation
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(DialogueGraph graph,bool useNumpadKeys)
+    public Conversation(DialogueGraph graph,bool useNumpadKeys, bool EndNaturally)
     {
         Graph = graph;
         NumberOfNegative = 0;
@@ -78,7 +81,8 @@ public class Conversation
             _validKeys = _numpadKeys;
         }
         currNode = Graph.nodes[0];
-        IsGraphValid = graph.CheckForConversationEnders();
+        this.EndNaturally = EndNaturally;
+        if(EndNaturally) IsGraphValid = graph.CheckForConversationEnders();
     }
     
     
@@ -150,7 +154,7 @@ public class Conversation
                 UpdateNumbers(currNode.QuestionPool[indexPressed].Effect);
                 Game.HideHelp();
                 Game.DisplaySubtitle(chosenAnswer.Answer);
-                Graph.OnQuestionChosen(chosenAnswer);
+                Graph.OnQuestionChosen(chosenAnswer, this);
                 if (chosenAnswer.EndsConversation)
                 {
                     DisplayDialogueEnd();

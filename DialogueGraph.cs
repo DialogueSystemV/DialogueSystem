@@ -50,22 +50,6 @@ public class DialogueGraph
     {
         return FindNode(NodeIdentifier).OutgoingEdges.ContainsKey(index);
     }
-
-    internal Node? GetLinkedNode(string identifier, int index)
-    {
-        Node node = FindNode(identifier);
-        if (node == null)
-        {
-            return null;
-        }
-
-        if (node.OutgoingEdges.ContainsKey(index))
-        {
-            return node.OutgoingEdges[index];
-        }
-
-        return null;
-    }
     
     internal void GetLinkedNode(string identifier, int index, Conversation convo)
     {
@@ -133,12 +117,12 @@ public class DialogueGraph
         throw new NotImplementedException();
     }
     
-    internal void OnQuestionChosen(PossibleAnswer chosenAnswer)
+    internal void OnQuestionChosen(PossibleAnswer chosenAnswer, Conversation convo)
     {
         if (chosenAnswer.PerformActionIfChosen != null) chosenAnswer.PerformActionIfChosen(Ped);
         if(chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswer.RemoveThoseQuestionsIfChosen);
         // add AddQuestionsIfChosen here and to if statement below
-        if (chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0)
+        if (convo.EndNaturally && chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0)
         {
             CheckForConversationEnders();
         }
@@ -149,8 +133,7 @@ public class DialogueGraph
         if (!nodes.Any(q =>
                 q.QuestionPool.Any(a => a.EndsConversation || a.PossibleAnswers.Any(pa => pa.EndsConversation))))
         {
-            throw new InvalidOperationException(
-                "No nodes contain an answer or question that will end the conversation.");
+            return false;
         }
         return true;
     }

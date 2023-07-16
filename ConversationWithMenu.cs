@@ -9,7 +9,7 @@ public class ConversationWithMenu : Conversation
 {
     public UIMenu ConversationMenu { get; set; }
 
-    public ConversationWithMenu(DialogueGraph graph, UIMenu ConversationMenu) : base(graph)
+    public ConversationWithMenu(DialogueGraph graph, bool EndNaturally, UIMenu ConversationMenu) : base(graph, EndNaturally)
     {
         this.ConversationMenu = ConversationMenu;
         this.ConversationMenu.OnItemSelect += OnItemSelect;
@@ -39,19 +39,17 @@ public class ConversationWithMenu : Conversation
                 DisplayDialogueEnd();
                 return;
             }
-
             PossibleAnswer chosenAnswer = currNode.QuestionPool[index].ChooseAnswer();
             InvokeEvent((currNode.QuestionPool[index], chosenAnswer));
             UpdateNumbers(currNode.QuestionPool[index].Effect);
             Game.HideHelp();
             Game.DisplaySubtitle(chosenAnswer.Answer);
-            Graph.OnQuestionChosen(chosenAnswer);
+            Graph.OnQuestionChosen(chosenAnswer, this);
             if (chosenAnswer.EndsConversation)
             {
                 DisplayDialogueEnd();
                 return;
             }
-
             Graph.GetLinkedNode(currNode.Identifier, index, this);
         });
     }
