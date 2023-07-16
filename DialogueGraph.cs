@@ -80,6 +80,23 @@ public class DialogueGraph
             convo.currNode = node.OutgoingEdges[index];
         }
     }
+    
+    internal void GetLinkedNode(string identifier, int index, ConversationWithMenu convo)
+    {
+        Node node = FindNode(identifier);
+        if (node == null)
+        {
+            return;
+        }
+
+        if (node.OutgoingEdges.ContainsKey(index))
+        {
+            convo.currNode = node.OutgoingEdges[index];
+            convo.ConversationMenu.Clear();
+            convo.AddQuestionsToMenu();
+            GameFiber.StartNew(() => CheckForConversationEnders());
+        }
+    }
 
     internal void RemoveLinks(string identifier, int index)
     {
@@ -134,9 +151,7 @@ public class DialogueGraph
         {
             throw new InvalidOperationException(
                 "No nodes contain an answer or question that will end the conversation.");
-            return false;
         }
-
         return true;
     }
 }

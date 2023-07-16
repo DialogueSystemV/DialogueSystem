@@ -4,8 +4,6 @@ using System.Linq;
 using System.Windows.Forms;
 using Rage;
 using Rage.Native;
-using RAGENativeUI;
-using RAGENativeUI.Elements;
 
 namespace DialogueSystem;
 
@@ -47,6 +45,22 @@ public class Conversation
     internal Node currNode;
 
     private bool IsGraphValid;
+
+    /// <summary>
+    /// Initializes an instance of the Conversation object 
+    /// </summary>
+    /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
+    /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
+    public Conversation(DialogueGraph graph)
+    {
+        Graph = graph;
+        NumberOfNegative = 0;
+        NumberOfNeutral = 0;
+        NumberOfPositive = 0;
+        currNode = Graph.nodes[0];
+        IsGraphValid = graph.CheckForConversationEnders();
+    }
+    
     
     /// <summary>
     /// Initializes an instance of the Conversation object 
@@ -67,7 +81,8 @@ public class Conversation
         IsGraphValid = graph.CheckForConversationEnders();
     }
     
-    private void UpdateNumbers(QuestionEffect effect)
+    
+    internal void UpdateNumbers(QuestionEffect effect)
     {
         switch (effect)
         {
@@ -127,6 +142,7 @@ public class Conversation
                 Game.DisplaySubtitle(currNode.QuestionPool[indexPressed].Question);
                 if (currNode.QuestionPool[indexPressed].EndsConversation)
                 {
+                    DisplayDialogueEnd();
                     break;
                 }
                 PossibleAnswer chosenAnswer = currNode.QuestionPool[indexPressed].ChooseAnswer();
@@ -137,6 +153,7 @@ public class Conversation
                 Graph.OnQuestionChosen(chosenAnswer);
                 if (chosenAnswer.EndsConversation)
                 {
+                    DisplayDialogueEnd();
                     break;
                 }
                 Graph.GetLinkedNode(currNode.Identifier, indexPressed, this);
@@ -144,37 +161,21 @@ public class Conversation
 
         });
     }
-
-
+    
     public void InterruptConversation()
     {
         Game.HideHelp();
         if(ConversationThread.IsAlive) {ConversationThread.Abort();}
     }
     
-    
-    /// <summary>
-    /// This method will add all your questions from a question pool to the menu specified.
-    /// </summary>
-    /// <param name="menu">Menu you want to add the question to</param>
-    /// <param name="q">Question pool the questions will be grabbed from</param>
-    public void AddQuestionsToMenu(UIMenu menu)
+    internal void InvokeEvent((QuestionAndAnswers, PossibleAnswer) e)
     {
-        foreach (QuestionAndAnswers qandas in currNode.QuestionPool)
-        {
-            menu.AddItem(new UIMenuItem(qandas.Question));
-        }
+        OnQuestionSelect?.Invoke(this,e);
     }
-    
-    /// <summary>
-    /// This method can be ran during the OnItemSelect event in RageNativeUI.
-    /// This will display the answer to the question clicked and update the number of question integers accordingly.
-    /// </summary>
-    /// <param name="index">Index of menu button selected</param>
-    /// <param name="q">Question pool that the question was asked from</param>
-    public void OnItemSelect(int index)
+
+    internal virtual void DisplayDialogueEnd()
     {
-        throw new NotImplementedException();
+        Game.DisplaySubtitle("~y~CONVERSATION OVER");
     }
     
     private void EnableControlAction(int control, int action, bool enable)

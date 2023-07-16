@@ -49,10 +49,5 @@ public class PossibleAnswer
         this.PerformActionIfChosen = PerformActionIfChosen;
         this.RemoveThoseQuestionsIfChosen = RemoveThoseQuestionsIfChosen;
     }
-
-    internal void RunAction()
-    {
-        PerformActionIfChosen(Ped);
-    }
     
 }
