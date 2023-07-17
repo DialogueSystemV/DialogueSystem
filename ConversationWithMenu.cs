@@ -21,9 +21,9 @@ public class ConversationWithMenu : Conversation
     /// <param name="q">Question pool the questions will be grabbed from</param>
     public void AddQuestionsToMenu()
     {
-        foreach (QuestionAndAnswers qandas in currNode.QuestionPool)
+        foreach (QuestionNode qandas in Graph.nodes)
         {
-            ConversationMenu.AddItem(new UIMenuItem(qandas.Question));
+            ConversationMenu.AddItem(new UIMenuItem(qandas.Value));
         }
     }
 
@@ -31,23 +31,22 @@ public class ConversationWithMenu : Conversation
     {
         GameFiber.StartNew(delegate
         {
-            QuestionAndAnswers qands = currNode.QuestionPool[index];
-            if (currNode.QuestionPool[index].EndsConversation)
+            QuestionNode qNode = Graph.nodes[index];
+            if (qNode.EndsConversation)
             {
                 DisplayDialogueEnd();
                 return;
             }
-            PossibleAnswer chosenAnswer = qands.ChooseAnswer();
-            InvokeEvent((qands, chosenAnswer));
-            UpdateNumbers(qands.Effect);
-            Game.DisplaySubtitle(chosenAnswer.Answer);
-            if (chosenAnswer.EndsConversation)
+            AnswerNode chosenAnswerNode = qNode.ChooseAnswer();
+            InvokeEvent((qNode, chosenAnswerNode));
+            UpdateNumbers(qNode.Effect);
+            Game.DisplaySubtitle(chosenAnswerNode.Value);
+            if (chosenAnswerNode.EndsConversation)
             {
                 DisplayDialogueEnd();
-                Graph.OnQuestionChosen(chosenAnswer, this);
+                Graph.OnQuestionChosen(chosenAnswerNode, this);
                 return;
             }
-            Graph.GetLinkedNode(currNode.Identifier, index, this);
         });
     }
 

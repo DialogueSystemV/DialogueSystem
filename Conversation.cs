@@ -27,7 +27,7 @@ public class Conversation
     /// </summary>
     public DialogueGraph Graph { get; set; }
     
-    public event EventHandler<(QuestionAndAnswers, PossibleAnswer)> OnQuestionSelect;
+    public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
     private static Keys[] _validKeys = new[]
     {
@@ -43,10 +43,6 @@ public class Conversation
 
     private static DateTime lastTimePressed = DateTime.MinValue;
 
-    internal Node currNode;
-
-    private bool IsGraphValid;
-
     /// <summary>
     /// Initializes an instance of the Conversation object 
     /// </summary>
@@ -58,7 +54,6 @@ public class Conversation
         NumberOfNegative = 0;
         NumberOfNeutral = 0;
         NumberOfPositive = 0;
-        currNode = Graph.nodes[0];
     }
     
     
@@ -77,7 +72,6 @@ public class Conversation
         {
             _validKeys = _numpadKeys;
         }
-        currNode = Graph.nodes[0];
     }
     
     
@@ -113,7 +107,7 @@ public class Conversation
             for (int i = 0; i < _validKeys.Length; i++)
             {
                 Keys key = _validKeys[i];
-                if (Game.IsKeyDown(key) && currNode.IsValidIndex(i))
+                if (Game.IsKeyDown(key) && Graph.IsValidIndex(i))
                 {
                     isValidKeyPressed = true;
                     indexPressed = i;
@@ -135,28 +129,27 @@ public class Conversation
             while (true)
             {
                 GameFiber.Yield();
-                Game.DisplayHelp(currNode.DisplayQuestions(), 10000);
+                Game.DisplayHelp(Graph.DisplayQuestions(), 10000);
                 var indexPressed = WaitForValidKeyPress();
-                QuestionAndAnswers qands = currNode.QuestionPool[indexPressed];
+                QuestionNode qNode = Graph.nodes[indexPressed];
                 Game.HideHelp();
-                Game.DisplaySubtitle(qands.Question);
-                if (qands.EndsConversation)
+                Game.DisplaySubtitle(qNode.Value);
+                if (qNode.EndsConversation)
                 {
                     DisplayDialogueEnd();
                     break;
                 }
-                var chosenAnswer = qands.ChooseAnswer();
-                OnQuestionSelect?.Invoke(this, (qands, chosenAnswer));
-                UpdateNumbers(qands.Effect);
+                AnswerNode chosenAnswer = qNode.ChooseAnswer();
+                OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
+                UpdateNumbers(qNode.Effect);
                 Game.HideHelp();
-                Game.DisplaySubtitle(chosenAnswer.Answer);
+                Game.DisplaySubtitle(chosenAnswer.Value);
                 if (chosenAnswer.EndsConversation)
                 {
                     DisplayDialogueEnd();
                     Graph.OnQuestionChosen(chosenAnswer, this);
                     break;
                 }
-                Graph.GetLinkedNode(currNode.Identifier, indexPressed, this);
             }
 
         });
@@ -175,7 +168,7 @@ public class Conversation
         }
     }
     
-    internal void InvokeEvent((QuestionAndAnswers, PossibleAnswer) e)
+    internal void InvokeEvent((QuestionNode, AnswerNode) e)
     {
         OnQuestionSelect?.Invoke(this,e);
     }

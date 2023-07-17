@@ -51,11 +51,11 @@
         <Compile Include="Conversation.cs" />
         <Compile Include="ConversationWithMenu.cs" />
         <Compile Include="DialogueGraph.cs" />
+        <Compile Include="AnswerNode.cs" />
         <Compile Include="Node.cs" />
-        <Compile Include="PossibleAnswer.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="QuestionAndAnswers.cs" />
         <Compile Include="QuestionEffect.cs" />
+        <Compile Include="QuestionNode.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />

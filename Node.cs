@@ -1,37 +1,40 @@
-using System.Collections.Generic;
+using System;
+using Rage;
 
 namespace DialogueSystem;
 
 public class Node
 {
-    public string Identifier { get; set; }
-    public List<QuestionAndAnswers> QuestionPool { get; set; }
+    public string Value { get; set; }
+    public bool EndsConversation { get; set; }
+    public Action<Ped>? PerformActionIfChosen{ get; set; }
 
-    internal Dictionary<int, Node> OutgoingEdges { get; set; }
+    public Node(string Value)
+    {
+        this.Value = Value;
+        EndsConversation = false;
+        PerformActionIfChosen = null;
+    }
+    
+    public Node(string Value, bool EndsConversation)
+    {
+        this.Value = Value;
+        this.EndsConversation = EndsConversation;
+        PerformActionIfChosen = null;
+    }
+    
+    public Node(string Value, Action<Ped> PerformActionIfChosen)
+    {
+        this.Value = Value;
+        EndsConversation = false;
+        this.PerformActionIfChosen = PerformActionIfChosen;
+    }
+    
+    public Node(string Value,Action<Ped> PerformActionIfChosen,bool EndsConversation)
+    {
+        this.Value = Value;
+        this.EndsConversation = EndsConversation;
+        this.PerformActionIfChosen = PerformActionIfChosen;
+    }
 
-    public Node(string identifier, List<QuestionAndAnswers> questionPool)
-    {
-        Identifier = identifier;
-        QuestionPool = questionPool;
-        OutgoingEdges = new Dictionary<int, Node>();
-    }
-    
-    public Node(string identifier, List<QuestionAndAnswers> questionPool, Dictionary<int, Node> OutgoingEdges)
-    {
-        Identifier = identifier;
-        QuestionPool = questionPool;
-        this.OutgoingEdges = OutgoingEdges;
-    }
-    
-    internal string DisplayQuestions()
-    {
-        string displaystr = "";
-        for(int i = 0; i< QuestionPool.Count; i++)
-        {
-            displaystr += $"[{i}]: {QuestionPool[i].Question}\n";
-        }
-        return displaystr;
-    }
-    
-    internal bool IsValidIndex(int i) => i < QuestionPool.Count;
 }
