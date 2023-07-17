@@ -9,7 +9,7 @@ public class ConversationWithMenu : Conversation
 {
     public UIMenu ConversationMenu { get; set; }
 
-    public ConversationWithMenu(DialogueGraph graph, bool EndNaturally, UIMenu ConversationMenu) : base(graph, EndNaturally)
+    public ConversationWithMenu(DialogueGraph graph, UIMenu ConversationMenu) : base(graph)
     {
         this.ConversationMenu = ConversationMenu;
     }
@@ -32,7 +32,6 @@ public class ConversationWithMenu : Conversation
         GameFiber.StartNew(delegate
         {
             QuestionAndAnswers qands = currNode.QuestionPool[index];
-            Game.DisplaySubtitle(qands.Question);
             if (currNode.QuestionPool[index].EndsConversation)
             {
                 DisplayDialogueEnd();
@@ -54,11 +53,8 @@ public class ConversationWithMenu : Conversation
 
     public void Activate()
     {
-        if (base.EndNaturally && CheckIfGraphValid())
-        {
-            ConversationMenu.OnItemSelect += OnItemSelect;
-            AddQuestionsToMenu();
-        }
+        ConversationMenu.OnItemSelect += OnItemSelect;
+        AddQuestionsToMenu();
     }
 
     public override void Run()

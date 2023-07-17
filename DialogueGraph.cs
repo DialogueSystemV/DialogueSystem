@@ -76,7 +76,6 @@ public class DialogueGraph
             convo.currNode = node.OutgoingEdges[index];
             convo.ConversationMenu.Clear();
             convo.AddQuestionsToMenu();
-            GameFiber.StartNew(() => CheckForConversationEnders());
         }
     }
 
@@ -116,19 +115,6 @@ public class DialogueGraph
         if (chosenAnswer.PerformActionIfChosen != null) chosenAnswer.PerformActionIfChosen(chosenAnswer.Ped);
         if(chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswer.RemoveThoseQuestionsIfChosen);
         // add AddQuestionsIfChosen here and to if statement below
-        if (convo.EndNaturally && chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0)
-        {
-            CheckForConversationEnders();
-        }
     }
 
-    internal bool CheckForConversationEnders()
-    {
-        if (!nodes.Any(q =>
-                q.QuestionPool.Any(a => a.EndsConversation || a.PossibleAnswers.Any(pa => pa.EndsConversation))))
-        {
-            return false;
-        }
-        return true;
-    }
 }
