@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Rage;
 using Rage.Native;
@@ -175,8 +176,15 @@ public class Conversation
     
     public void InterruptConversation()
     {
-        Game.HideHelp();
-        if (ConversationThread.IsAlive) ConversationThread.Abort();
+        try
+        {
+            Game.HideHelp();
+            if (ConversationThread.IsAlive) ConversationThread.Abort();
+        }
+        catch (ThreadAbortException TAE)
+        {
+            Game.LogTrivial("Conversation interrupted");            
+        }
     }
     
     internal void InvokeEvent((QuestionAndAnswers, PossibleAnswer) e)
