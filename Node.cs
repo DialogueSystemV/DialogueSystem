@@ -15,7 +15,14 @@ public class Node
         QuestionPool = questionPool;
         OutgoingEdges = new Dictionary<int, Node>();
     }
-
+    
+    public Node(string identifier, List<QuestionAndAnswers> questionPool, Dictionary<int, Node> OutgoingEdges)
+    {
+        Identifier = identifier;
+        QuestionPool = questionPool;
+        this.OutgoingEdges = OutgoingEdges;
+    }
+    
     internal string DisplayQuestions()
     {
         string displaystr = "";
