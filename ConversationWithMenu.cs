@@ -52,13 +52,18 @@ public class ConversationWithMenu : Conversation
         });
     }
 
-    public override void Run()
+    public void Activate()
     {
         if (base.EndNaturally && CheckIfGraphValid())
         {
             ConversationMenu.OnItemSelect += OnItemSelect;
             AddQuestionsToMenu();
         }
+    }
+
+    public override void Run()
+    {
+        Activate();
     }
 
     internal override void DisplayDialogueEnd()
