@@ -145,7 +145,7 @@ public class Conversation
     /// <summary>
     /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
     /// </summary>
-    public void Run()
+    public virtual void Run()
     {
         if (EndNaturally && !CheckIfGraphValid()) return; 
         ConversationThread = GameFiber.StartNew(delegate

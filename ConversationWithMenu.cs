@@ -12,11 +12,6 @@ public class ConversationWithMenu : Conversation
     public ConversationWithMenu(DialogueGraph graph, bool EndNaturally, UIMenu ConversationMenu) : base(graph, EndNaturally)
     {
         this.ConversationMenu = ConversationMenu;
-        if (base.EndNaturally && CheckIfGraphValid())
-        {
-            this.ConversationMenu.OnItemSelect += OnItemSelect;
-            AddQuestionsToMenu();
-        }
     }
     
     /// <summary>
@@ -55,6 +50,15 @@ public class ConversationWithMenu : Conversation
             }
             Graph.GetLinkedNode(currNode.Identifier, index, this);
         });
+    }
+
+    public override void Run()
+    {
+        if (base.EndNaturally && CheckIfGraphValid())
+        {
+            ConversationMenu.OnItemSelect += OnItemSelect;
+            AddQuestionsToMenu();
+        }
     }
 
     internal override void DisplayDialogueEnd()
