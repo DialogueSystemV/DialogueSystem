@@ -31,21 +31,21 @@ public class ConversationWithMenu : Conversation
     {
         GameFiber.StartNew(delegate
         {
-            Game.DisplaySubtitle(currNode.QuestionPool[index].Question);
+            QuestionAndAnswers qands = currNode.QuestionPool[index];
+            Game.DisplaySubtitle(qands.Question);
             if (currNode.QuestionPool[index].EndsConversation)
             {
                 DisplayDialogueEnd();
                 return;
             }
-            PossibleAnswer chosenAnswer = currNode.QuestionPool[index].ChooseAnswer();
-            InvokeEvent((currNode.QuestionPool[index], chosenAnswer));
-            UpdateNumbers(currNode.QuestionPool[index].Effect);
-            Game.HideHelp();
+            PossibleAnswer chosenAnswer = qands.ChooseAnswer();
+            InvokeEvent((qands, chosenAnswer));
+            UpdateNumbers(qands.Effect);
             Game.DisplaySubtitle(chosenAnswer.Answer);
-            Graph.OnQuestionChosen(chosenAnswer, this);
             if (chosenAnswer.EndsConversation)
             {
                 DisplayDialogueEnd();
+                Graph.OnQuestionChosen(chosenAnswer, this);
                 return;
             }
             Graph.GetLinkedNode(currNode.Identifier, index, this);

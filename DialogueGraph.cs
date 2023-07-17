@@ -85,26 +85,21 @@ public class DialogueGraph
         Node node = FindNode(identifier);
         node.OutgoingEdges.Remove(index);
     }
-    
-    
+
+
     internal void RemoveQuestions(List<string> questionsToRemove)
     {
-        foreach (Node n in nodes)
+        foreach (Node currNode in nodes)
         {
-            for(int i = 0; i < n.QuestionPool.Count; i++)
+            currNode.QuestionPool.RemoveAll(qandas => questionsToRemove.Contains(qandas.Question));
+            foreach (var kvp in currNode.OutgoingEdges)
             {
-                var qandas = n.QuestionPool[i];
-                foreach (string q in questionsToRemove)
+                if (kvp.Key >= currNode.QuestionPool.Count)
                 {
-                    if (qandas.Question.Equals(q))
+                    if (kvp.Value == currNode)
                     {
-                        if(IsQuestionLinked(n.Identifier,i))
-                        {
-                            RemoveLinks(n.Identifier, i);   
-                        }
-                        n.QuestionPool.Remove(qandas);
+                        currNode.OutgoingEdges.Remove(kvp.Key);
                     }
-                    break;
                 }
             }
         }
@@ -112,6 +107,7 @@ public class DialogueGraph
 
     internal void AddQuestions(List<string> questionsToAdd)
     {
+        //will have to check whether 
         throw new NotImplementedException();
     }
     

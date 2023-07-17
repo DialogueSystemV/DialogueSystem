@@ -155,22 +155,23 @@ public class Conversation
                 GameFiber.Yield();
                 Game.DisplayHelp(currNode.DisplayQuestions(), 10000);
                 int indexPressed = WaitForValidKeyPress();
+                QuestionAndAnswers qands = currNode.QuestionPool[indexPressed];
                 Game.HideHelp();
-                Game.DisplaySubtitle(currNode.QuestionPool[indexPressed].Question);
-                if (currNode.QuestionPool[indexPressed].EndsConversation)
+                Game.DisplaySubtitle(qands.Question);
+                if (qands.EndsConversation)
                 {
                     DisplayDialogueEnd();
                     break;
                 }
-                PossibleAnswer chosenAnswer = currNode.QuestionPool[indexPressed].ChooseAnswer();
-                OnQuestionSelect?.Invoke(this, (currNode.QuestionPool[indexPressed], chosenAnswer));
-                UpdateNumbers(currNode.QuestionPool[indexPressed].Effect);
+                PossibleAnswer chosenAnswer = qands.ChooseAnswer();
+                OnQuestionSelect?.Invoke(this, (qands, chosenAnswer));
+                UpdateNumbers(qands.Effect);
                 Game.HideHelp();
                 Game.DisplaySubtitle(chosenAnswer.Answer);
-                Graph.OnQuestionChosen(chosenAnswer, this);
                 if (chosenAnswer.EndsConversation)
                 {
                     DisplayDialogueEnd();
+                    Graph.OnQuestionChosen(chosenAnswer, this);
                     break;
                 }
                 Graph.GetLinkedNode(currNode.Identifier, indexPressed, this);
@@ -182,7 +183,7 @@ public class Conversation
     public void InterruptConversation()
     {
         Game.HideHelp();
-        if(ConversationThread.IsAlive) {ConversationThread.Abort();}
+        if (ConversationThread.IsAlive) ConversationThread.Abort();
     }
     
     internal void InvokeEvent((QuestionAndAnswers, PossibleAnswer) e)
