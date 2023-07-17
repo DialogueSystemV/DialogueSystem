@@ -8,12 +8,10 @@ namespace DialogueSystem;
 public class DialogueGraph
 {
     public List<Node> nodes;
-    public Ped Ped;
 
-    public DialogueGraph(List<Node> nodes, Ped ped)
+    public DialogueGraph(List<Node> nodes)
     {
         this.nodes = nodes;
-        Ped = ped;
     }
 
     public void AddNode(string identifier, List<QuestionAndAnswers> questionPool)
@@ -119,7 +117,7 @@ public class DialogueGraph
     
     internal void OnQuestionChosen(PossibleAnswer chosenAnswer, Conversation convo)
     {
-        if (chosenAnswer.PerformActionIfChosen != null) chosenAnswer.PerformActionIfChosen(Ped);
+        if (chosenAnswer.PerformActionIfChosen != null) chosenAnswer.PerformActionIfChosen(chosenAnswer.Ped);
         if(chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswer.RemoveThoseQuestionsIfChosen);
         // add AddQuestionsIfChosen here and to if statement below
         if (convo.EndNaturally && chosenAnswer.RemoveThoseQuestionsIfChosen.Count != 0)
