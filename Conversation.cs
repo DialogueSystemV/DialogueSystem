@@ -97,18 +97,6 @@ public class Conversation
         }
     }
 
-    internal bool CheckIfGraphValid()
-    {
-        if (!IsGraphValid)
-        {
-            Game.DisplayNotification("Dialogue System does not have any \"conversation enders\". Dialogue System will not be running. " +
-                                     "Please report this to the dev.");
-            return false;
-        }
-
-        return true;
-    }
-    
     private int WaitForValidKeyPress()
     {
         bool isValidKeyPressed = false;
@@ -148,7 +136,7 @@ public class Conversation
             {
                 GameFiber.Yield();
                 Game.DisplayHelp(currNode.DisplayQuestions(), 10000);
-                int indexPressed = WaitForValidKeyPress();
+                var indexPressed = WaitForValidKeyPress();
                 QuestionAndAnswers qands = currNode.QuestionPool[indexPressed];
                 Game.HideHelp();
                 Game.DisplaySubtitle(qands.Question);
@@ -157,7 +145,7 @@ public class Conversation
                     DisplayDialogueEnd();
                     break;
                 }
-                PossibleAnswer chosenAnswer = qands.ChooseAnswer();
+                var chosenAnswer = qands.ChooseAnswer();
                 OnQuestionSelect?.Invoke(this, (qands, chosenAnswer));
                 UpdateNumbers(qands.Effect);
                 Game.HideHelp();
