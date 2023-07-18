@@ -162,7 +162,7 @@ public class Conversation
             Game.HideHelp();
             if (ConversationThread.IsAlive) ConversationThread.Abort();
         }
-        catch (ThreadAbortException TAE)
+        catch (ThreadAbortException)
         {
             Game.LogTrivial("Conversation interrupted");            
         }
