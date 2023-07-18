@@ -9,12 +9,13 @@ public class QuestionNode : Node
 {
     public QuestionEffect Effect { get; set; }
 
+    private List<AnswerNode> _possibleAnswers;
     public List<AnswerNode> PossibleAnswers
     {
-        get { return PossibleAnswers; }
+        get { return _possibleAnswers; }
         set
         {
-            PossibleAnswers = value;
+            _possibleAnswers = value;
             SortProbs();
         }
     }
