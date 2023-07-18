@@ -44,7 +44,7 @@ public class ConversationWithMenu : Conversation
             if (chosenAnswerNode.EndsConversation)
             {
                 DisplayDialogueEnd();
-                Graph.OnQuestionChosen(chosenAnswerNode, this);
+                Graph.OnQuestionChosen(chosenAnswerNode, this); 
                 return;
             }
         });

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Rage;
 
 namespace DialogueSystem;
@@ -21,13 +22,13 @@ public class QuestionNode : Node
         PossibleAnswers = possibleAnswers;
     }
     
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect) : base(Value, PerformActionIfChosen)
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, Ped ped, QuestionEffect Effect) : base(Value, PerformActionIfChosen, ped)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
     }
     
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool EndsConversation) : base(Value, PerformActionIfChosen, EndsConversation)
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, Ped ped, QuestionEffect Effect, bool EndsConversation) : base(Value, PerformActionIfChosen, ped,EndsConversation)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
@@ -35,15 +36,17 @@ public class QuestionNode : Node
     
     internal AnswerNode ChooseAnswer()
     {
+        List<AnswerNode> AnswersThatMeetCondition = new List<AnswerNode>();
         foreach (AnswerNode PA in PossibleAnswers)
         {
             if (PA.Condition != null && PA.Condition(PA.Ped))
             {
-                return PA;
+                AnswersThatMeetCondition.Add(PA);
             }
         }
-
-        return PossibleAnswers[0];
+        return AnswersThatMeetCondition.Count == 0
+            ? PossibleAnswers.OrderByDescending(item => item.Probability).First()
+            : AnswersThatMeetCondition.OrderByDescending(item => item.Probability).First();
     }
     
     

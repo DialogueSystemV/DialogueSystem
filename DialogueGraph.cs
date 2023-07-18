@@ -26,9 +26,10 @@ public class DialogueGraph
     
     internal void OnQuestionChosen(AnswerNode chosenAnswerNode, Conversation convo)
     {
-        if (chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
-        if(chosenAnswerNode.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswerNode.RemoveThoseQuestionsIfChosen);
-        //if(chosenAnswerNode.RemoveThoseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswerNode.RemoveThoseQuestionsIfChosen);
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
+        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        if(convo.Graph.nodes.Count == 0) convo.DisplayDialogueEnd();
     }
     
     internal bool IsValidIndex(int index) => index < nodes.Count;
@@ -43,6 +44,7 @@ public class DialogueGraph
         }
         return displaystr;
     }
+    public void ClearGraph() => nodes.Clear();
 
-    
+
 }
