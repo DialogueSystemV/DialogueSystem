@@ -8,14 +8,12 @@ public class Node
     public string Value { get; set; }
     public bool EndsConversation { get; set; }
     public Action<Ped>? PerformActionIfChosen{ get; set; }
-    public Ped? Ped { get; set; }
 
     public Node(string Value)
     {
         this.Value = Value;
         EndsConversation = false;
         PerformActionIfChosen = null;
-        Ped = null;
     }
     
     public Node(string Value, bool EndsConversation)
@@ -23,31 +21,20 @@ public class Node
         this.Value = Value;
         this.EndsConversation = EndsConversation;
         PerformActionIfChosen = null;
-        Ped = null;
     }
     
-    public Node(string Value, Action<Ped> PerformActionIfChosen, Ped Ped)
+    public Node(string Value, Action<Ped> PerformActionIfChosen)
     {
         this.Value = Value;
         EndsConversation = false;
         this.PerformActionIfChosen = PerformActionIfChosen;
-        this.Ped = Ped;
-        if (Ped == null)
-        {
-            throw new ArgumentNullException("Ped cannot be null");
-        }
     }
     
-    public Node(string Value,Action<Ped> PerformActionIfChosen,Ped Ped,bool EndsConversation)
+    public Node(string Value,Action<Ped> PerformActionIfChosen,bool EndsConversation)
     {
         this.Value = Value;
         this.EndsConversation = EndsConversation;
         this.PerformActionIfChosen = PerformActionIfChosen;
-        this.Ped = Ped;
-        if (Ped == null)
-        {
-            throw new ArgumentNullException("Ped cannot be null");
-        }
     }
 
 }

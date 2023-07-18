@@ -36,25 +36,25 @@ public class QuestionNode : Node
         PossibleAnswers = possibleAnswers;
     }
     
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, Ped ped, QuestionEffect Effect) : base(Value, PerformActionIfChosen, ped)
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect) : base(Value, PerformActionIfChosen)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
     }
     
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, Ped ped, QuestionEffect Effect, bool EndsConversation) : base(Value, PerformActionIfChosen, ped,EndsConversation)
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool EndsConversation) : base(Value, PerformActionIfChosen, EndsConversation)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
     }
     
-    internal AnswerNode ChooseAnswer()
+    internal AnswerNode ChooseAnswer(DialogueGraph graph)
     {
         List<AnswerNode> AnswersThatMeetCondition = new List<AnswerNode>();
         int max = -100;
         foreach (AnswerNode PA in PossibleAnswers)
         {
-            if (PA.Condition != null && PA.Condition(PA.Ped))
+            if (PA.Condition != null && PA.Condition(graph.Ped))
             {
                 AnswersThatMeetCondition.Add(PA);
                 if (PA.Probability > max)

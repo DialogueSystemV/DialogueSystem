@@ -59,7 +59,7 @@ public class ConversationWithMenu : Conversation
                 DisplayDialogueEnd();
                 return;
             }
-            AnswerNode chosenAnswerNode = qNode.ChooseAnswer();
+            AnswerNode chosenAnswerNode = qNode.ChooseAnswer(Graph);
             InvokeEvent((qNode, chosenAnswerNode));
             UpdateNumbers(qNode.Effect);
             Game.DisplaySubtitle(chosenAnswerNode.Value);
@@ -75,7 +75,7 @@ public class ConversationWithMenu : Conversation
     
     internal override void OnQuestionChosen(AnswerNode chosenAnswerNode)
     {
-        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Graph.Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
         if(Graph.nodes.Count == 0) DisplayDialogueEnd();

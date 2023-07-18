@@ -28,25 +28,23 @@ public class AnswerNode : Node
         AddTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Ped Ped) : base(answer)
+    public AnswerNode(string answer, int probability, Predicate<Ped> Condition) : base(answer)
     {
         this.Condition = Condition;
-        base.Ped = Ped;
         Probability = probability;
         RemoveTheseQuestionsIfChosen = new List<QuestionNode>();
         AddTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Ped Ped, bool EndsConversation) : base(answer, EndsConversation)
+    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, bool EndsConversation) : base(answer, EndsConversation)
     {
         this.Condition = Condition;
-        base.Ped = Ped;
         Probability = probability;
         AddTheseQuestionsIfChosen = new List<QuestionNode>();
         RemoveTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Action<Ped> PerformActionIfChosen, Ped Ped) : base(answer,PerformActionIfChosen, Ped)
+    public AnswerNode(string answer, int probability, Action<Ped> PerformActionIfChosen) : base(answer,PerformActionIfChosen)
     {
         Condition = null;
         Probability = probability;
@@ -54,7 +52,7 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Action<Ped> PerformActionIfChosen, Ped Ped, bool EndsConversation) : base(answer,PerformActionIfChosen, Ped,EndsConversation)
+    public AnswerNode(string answer, int probability, Action<Ped> PerformActionIfChosen, bool EndsConversation) : base(answer,PerformActionIfChosen, EndsConversation)
     {
         Probability = probability;
         Condition = null;
@@ -62,7 +60,7 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Ped Ped, Action<Ped> PerformActionIfChosen) : base(answer,PerformActionIfChosen, Ped)
+    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Action<Ped> PerformActionIfChosen) : base(answer,PerformActionIfChosen)
     {
         this.Condition = Condition;
         Probability = probability;
@@ -70,7 +68,7 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Ped Ped, Action<Ped> PerformActionIfChosen, bool EndsConversation) : base(answer,PerformActionIfChosen, Ped,EndsConversation)
+    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Action<Ped> PerformActionIfChosen, bool EndsConversation) : base(answer,PerformActionIfChosen, EndsConversation)
     {
         this.Condition = Condition;
         Probability = probability;
@@ -78,7 +76,7 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = new List<QuestionNode>();
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Action<Ped> PerformActionIfChosen, Ped Ped, List<QuestionNode> removeTheseQuestionsIfChosen): base(answer, PerformActionIfChosen,Ped)
+    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Action<Ped> PerformActionIfChosen, List<QuestionNode> removeTheseQuestionsIfChosen): base(answer, PerformActionIfChosen)
     {
         this.Condition = Condition;
         Probability = probability;
@@ -87,7 +85,7 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = removeTheseQuestionsIfChosen;
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Action<Ped> PerformActionIfChosen, Ped Ped, List<QuestionNode> removeTheseQuestionsIfChosen, List<QuestionNode> addTheseQuestionsIfChosen): base(answer, PerformActionIfChosen,Ped)
+    public AnswerNode(string answer, int probability, Predicate<Ped> Condition, Action<Ped> PerformActionIfChosen, List<QuestionNode> removeTheseQuestionsIfChosen, List<QuestionNode> addTheseQuestionsIfChosen): base(answer, PerformActionIfChosen)
     {
         this.Condition = Condition;
         Probability = probability;
@@ -96,7 +94,7 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = removeTheseQuestionsIfChosen;
     }
  
-    public AnswerNode(string answer, int probability, Action<Ped> PerformActionIfChosen, Ped Ped, List<QuestionNode> addTheseQuestionsIfChosen, List<QuestionNode> removeQuestions ) : base(answer,PerformActionIfChosen, Ped)
+    public AnswerNode(string answer, int probability, Action<Ped> PerformActionIfChosen, List<QuestionNode> addTheseQuestionsIfChosen, List<QuestionNode> removeQuestions ) : base(answer,PerformActionIfChosen)
     {
         Condition = null;
         Probability = probability;
@@ -104,11 +102,10 @@ public class AnswerNode : Node
         RemoveTheseQuestionsIfChosen = removeQuestions;
     }
     
-    public AnswerNode(string answer, int probability, Predicate<Ped> condition, Ped Ped, List<QuestionNode> addTheseQuestionsIfChosen, List<QuestionNode> removeQuestions ) : base(answer)
+    public AnswerNode(string answer, int probability, Predicate<Ped> condition, List<QuestionNode> addTheseQuestionsIfChosen, List<QuestionNode> removeQuestions ) : base(answer)
     {
         Condition = condition;
         Probability = probability;
-        base.Ped = Ped;
         AddTheseQuestionsIfChosen = addTheseQuestionsIfChosen;
         RemoveTheseQuestionsIfChosen = removeQuestions;
     }

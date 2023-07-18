@@ -9,10 +9,12 @@ namespace DialogueSystem;
 public class DialogueGraph
 {
     public List<QuestionNode> nodes;
+    public Ped Ped;
 
-    public DialogueGraph(List<QuestionNode> nodes)
+    public DialogueGraph(List<QuestionNode> nodes, Ped ped)
     {
         this.nodes = nodes;
+        Ped = ped;
     }
     
     internal void RemoveQuestions(List<QuestionNode> questionsToRemove)

@@ -139,7 +139,7 @@ public class Conversation
                     DisplayDialogueEnd();
                     break;
                 }
-                AnswerNode chosenAnswer = qNode.ChooseAnswer();
+                AnswerNode chosenAnswer = qNode.ChooseAnswer(Graph);
                 OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
                 UpdateNumbers(qNode.Effect);
                 Game.HideHelp();
@@ -181,7 +181,7 @@ public class Conversation
     
     internal virtual void OnQuestionChosen(AnswerNode chosenAnswerNode)
     {
-        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Graph.Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
         if(Graph.nodes.Count == 0) DisplayDialogueEnd();
