@@ -31,9 +31,9 @@ public class ConversationWithMenu : Conversation
     internal void AddQuestionsToMenu(List<QuestionNode> questionsToAdd)
     {
         Graph.AddQuestions(questionsToAdd);
-        foreach (QuestionNode qandas in Graph.nodes)
+        foreach (QuestionNode n in questionsToAdd)
         {
-            ConversationMenu.AddItem(new UIMenuItem(qandas.Value));
+            ConversationMenu.AddItem(new UIMenuItem(n.Value));
         }
     }
 
