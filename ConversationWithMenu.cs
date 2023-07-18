@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Rage;
 using RAGENativeUI;
@@ -26,6 +27,27 @@ public class ConversationWithMenu : Conversation
             ConversationMenu.AddItem(new UIMenuItem(qandas.Value));
         }
     }
+    
+    internal void AddQuestionsToMenu(List<QuestionNode> questionsToAdd)
+    {
+        Graph.AddQuestions(questionsToAdd);
+        foreach (QuestionNode qandas in Graph.nodes)
+        {
+            ConversationMenu.AddItem(new UIMenuItem(qandas.Value));
+        }
+    }
+
+    internal void RemoveQuestionsFromMenu(List<QuestionNode> questionsToRemove)
+    {
+        Graph.RemoveQuestions(questionsToRemove);
+        List<UIMenuItem> newItems = new();
+        foreach (QuestionNode n in Graph.nodes)
+        {
+            newItems.Add(new UIMenuItem(n.Value));
+        }
+        ConversationMenu.MenuItems = newItems;
+        ConversationMenu.RefreshIndex();
+    }
 
     internal void OnItemSelect(UIMenu sender, UIMenuItem selecteditem, int index)
     {
@@ -44,11 +66,20 @@ public class ConversationWithMenu : Conversation
             if (chosenAnswerNode.EndsConversation)
             {
                 DisplayDialogueEnd();
-                Graph.OnQuestionChosen(chosenAnswerNode, this); 
+                OnQuestionChosen(chosenAnswerNode); 
                 return;
             }
         });
     }
+    
+    internal override void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    {
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
+        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
+    }
+
 
     public void Activate()
     {

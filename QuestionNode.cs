@@ -19,8 +19,9 @@ public class QuestionNode : Node
             SortProbs();
         }
     }
-    internal List<int> defaultProbs { get; set; }
-    internal int defaultProbMax { get; set; }
+
+    internal List<int> defaultProbs = new();
+    internal int defaultProbMax = -100;
 
     internal Random rndm = new(DateTime.Now.Millisecond);
     public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect) : base(Value)

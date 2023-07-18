@@ -147,7 +147,7 @@ public class Conversation
                 if (chosenAnswer.EndsConversation)
                 {
                     DisplayDialogueEnd();
-                    Graph.OnQuestionChosen(chosenAnswer, this);
+                    OnQuestionChosen(chosenAnswer);
                     break;
                 }
             }
@@ -176,6 +176,14 @@ public class Conversation
     internal virtual void DisplayDialogueEnd()
     {
         Game.DisplaySubtitle("~y~CONVERSATION OVER");
+    }
+    
+    internal virtual void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    {
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
+        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
     }
     
     private void EnableControlAction(int control, int action, bool enable)

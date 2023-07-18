@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Rage;
+using RAGENativeUI;
 
 // ReSharper disable All
 namespace DialogueSystem;
@@ -24,16 +25,7 @@ public class DialogueGraph
         nodes.AddRange(questionsToAdd);
     }
     
-    internal void OnQuestionChosen(AnswerNode chosenAnswerNode, Conversation convo)
-    {
-        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(chosenAnswerNode.Ped);
-        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
-        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
-        if(convo.Graph.nodes.Count == 0) convo.DisplayDialogueEnd();
-    }
-    
     internal bool IsValidIndex(int index) => index < nodes.Count;
-
     
     internal string DisplayQuestions()
     {
