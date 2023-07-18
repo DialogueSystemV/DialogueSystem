@@ -112,4 +112,12 @@ public class AnswerNode : Node
         AddTheseQuestionsIfChosen = addTheseQuestionsIfChosen;
         RemoveTheseQuestionsIfChosen = removeQuestions;
     }
+    
+    public AnswerNode(string answer, int prob, List<QuestionNode> addTheseQuestionsIfChosen, List<QuestionNode> removeQuestions ) : base(answer)
+    {
+        Condition = null;
+        Probability = prob;
+        AddTheseQuestionsIfChosen = addTheseQuestionsIfChosen;
+        RemoveTheseQuestionsIfChosen = removeQuestions;
+    }
 }
