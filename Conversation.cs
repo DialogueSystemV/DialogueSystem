@@ -27,7 +27,7 @@ public class Conversation
     /// </summary>
     public DialogueGraph Graph { get; set; }
     
-    public event EventHandler<(QuestionAndAnswers, PossibleAnswer)> OnQuestionSelect;
+    public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
     private static Keys[] _validKeys = new[]
     {
@@ -42,23 +42,25 @@ public class Conversation
     internal GameFiber ConversationThread;
 
     private static DateTime lastTimePressed = DateTime.MinValue;
-
-    internal Node currNode;
-
-    private bool IsGraphValid;
+    
+    public Ped Ped { get; set; }
 
     /// <summary>
     /// Initializes an instance of the Conversation object 
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(DialogueGraph graph)
+    public Conversation(DialogueGraph graph, Ped Ped)
     {
         Graph = graph;
         NumberOfNegative = 0;
         NumberOfNeutral = 0;
         NumberOfPositive = 0;
-        currNode = Graph.nodes[0];
+        this.Ped = Ped;
+        if (Ped == null)
+        {
+            throw new ArgumentNullException("Ped cannot be null");
+        }
     }
     
     
@@ -67,7 +69,7 @@ public class Conversation
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(DialogueGraph graph,bool useNumpadKeys)
+    public Conversation(DialogueGraph graph,bool useNumpadKeys, Ped Ped)
     {
         Graph = graph;
         NumberOfNegative = 0;
@@ -77,7 +79,11 @@ public class Conversation
         {
             _validKeys = _numpadKeys;
         }
-        currNode = Graph.nodes[0];
+        this.Ped = Ped;
+        if (Ped == null)
+        {
+            throw new ArgumentNullException("Ped cannot be null");
+        }
     }
     
     
@@ -113,7 +119,7 @@ public class Conversation
             for (int i = 0; i < _validKeys.Length; i++)
             {
                 Keys key = _validKeys[i];
-                if (Game.IsKeyDown(key) && currNode.IsValidIndex(i))
+                if (Game.IsKeyDown(key) && Graph.IsValidIndex(i))
                 {
                     isValidKeyPressed = true;
                     indexPressed = i;
@@ -135,28 +141,28 @@ public class Conversation
             while (true)
             {
                 GameFiber.Yield();
-                Game.DisplayHelp(currNode.DisplayQuestions(), 10000);
+                Game.DisplayHelp(Graph.DisplayQuestions(), 10000);
                 var indexPressed = WaitForValidKeyPress();
-                QuestionAndAnswers qands = currNode.QuestionPool[indexPressed];
+                QuestionNode qNode = Graph.nodes[indexPressed];
                 Game.HideHelp();
-                Game.DisplaySubtitle(qands.Question);
-                if (qands.EndsConversation)
+                Game.DisplaySubtitle(qNode.Value);
+                if (qNode.EndsConversation)
                 {
                     DisplayDialogueEnd();
                     break;
                 }
-                var chosenAnswer = qands.ChooseAnswer();
-                OnQuestionSelect?.Invoke(this, (qands, chosenAnswer));
-                UpdateNumbers(qands.Effect);
+                AnswerNode chosenAnswer = qNode.ChooseAnswer(this);
+                OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
+                UpdateNumbers(qNode.Effect);
                 Game.HideHelp();
-                Game.DisplaySubtitle(chosenAnswer.Answer);
+                Game.DisplaySubtitle(chosenAnswer.Value);
                 if (chosenAnswer.EndsConversation)
                 {
                     DisplayDialogueEnd();
-                    Graph.OnQuestionChosen(chosenAnswer, this);
+                    OnQuestionChosen(chosenAnswer);
                     break;
                 }
-                Graph.GetLinkedNode(currNode.Identifier, indexPressed, this);
+                OnQuestionChosen(chosenAnswer);
             }
 
         });
@@ -169,13 +175,13 @@ public class Conversation
             Game.HideHelp();
             if (ConversationThread.IsAlive) ConversationThread.Abort();
         }
-        catch (ThreadAbortException TAE)
+        catch (ThreadAbortException)
         {
             Game.LogTrivial("Conversation interrupted");            
         }
     }
     
-    internal void InvokeEvent((QuestionAndAnswers, PossibleAnswer) e)
+    internal void InvokeEvent((QuestionNode, AnswerNode) e)
     {
         OnQuestionSelect?.Invoke(this,e);
     }
@@ -183,6 +189,14 @@ public class Conversation
     internal virtual void DisplayDialogueEnd()
     {
         Game.DisplaySubtitle("~y~CONVERSATION OVER");
+    }
+    
+    internal virtual void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    {
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
+        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
     }
     
     private void EnableControlAction(int control, int action, bool enable)

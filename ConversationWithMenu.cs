@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Rage;
 using RAGENativeUI;
@@ -9,7 +10,7 @@ public class ConversationWithMenu : Conversation
 {
     public UIMenu ConversationMenu { get; set; }
 
-    public ConversationWithMenu(DialogueGraph graph, UIMenu ConversationMenu) : base(graph)
+    public ConversationWithMenu(DialogueGraph graph, Ped ped,UIMenu ConversationMenu) : base(graph, ped)
     {
         this.ConversationMenu = ConversationMenu;
     }
@@ -21,35 +22,65 @@ public class ConversationWithMenu : Conversation
     /// <param name="q">Question pool the questions will be grabbed from</param>
     public void AddQuestionsToMenu()
     {
-        foreach (QuestionAndAnswers qandas in currNode.QuestionPool)
+        foreach (QuestionNode qandas in Graph.nodes)
         {
-            ConversationMenu.AddItem(new UIMenuItem(qandas.Question));
+            ConversationMenu.AddItem(new UIMenuItem(qandas.Value));
         }
+    }
+    
+    internal void AddQuestionsToMenu(List<QuestionNode> questionsToAdd)
+    {
+        Graph.AddQuestions(questionsToAdd);
+        foreach (QuestionNode n in questionsToAdd)
+        {
+            ConversationMenu.AddItem(new UIMenuItem(n.Value));
+        }
+    }
+
+    internal void RemoveQuestionsFromMenu(List<QuestionNode> questionsToRemove)
+    {
+        Graph.RemoveQuestions(questionsToRemove);
+        List<UIMenuItem> newItems = new();
+        foreach (QuestionNode n in Graph.nodes)
+        {
+            newItems.Add(new UIMenuItem(n.Value));
+        }
+        ConversationMenu.MenuItems = newItems;
+        ConversationMenu.RefreshIndex();
     }
 
     internal void OnItemSelect(UIMenu sender, UIMenuItem selecteditem, int index)
     {
         GameFiber.StartNew(delegate
         {
-            QuestionAndAnswers qands = currNode.QuestionPool[index];
-            if (currNode.QuestionPool[index].EndsConversation)
+            QuestionNode qNode = Graph.nodes[index];
+            if (qNode.EndsConversation)
             {
                 DisplayDialogueEnd();
                 return;
             }
-            PossibleAnswer chosenAnswer = qands.ChooseAnswer();
-            InvokeEvent((qands, chosenAnswer));
-            UpdateNumbers(qands.Effect);
-            Game.DisplaySubtitle(chosenAnswer.Answer);
-            if (chosenAnswer.EndsConversation)
+            AnswerNode chosenAnswerNode = qNode.ChooseAnswer(this);
+            InvokeEvent((qNode, chosenAnswerNode));
+            UpdateNumbers(qNode.Effect);
+            Game.DisplaySubtitle(chosenAnswerNode.Value);
+            if (chosenAnswerNode.EndsConversation)
             {
                 DisplayDialogueEnd();
-                Graph.OnQuestionChosen(chosenAnswer, this);
+                OnQuestionChosen(chosenAnswerNode); 
                 return;
             }
-            Graph.GetLinkedNode(currNode.Identifier, index, this);
+            OnQuestionChosen(chosenAnswerNode);
         });
     }
+    
+    internal override void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    {
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
+        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
+    }
+
 
     public void Activate()
     {
