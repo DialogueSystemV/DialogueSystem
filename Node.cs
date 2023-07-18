@@ -32,6 +32,10 @@ public class Node
         EndsConversation = false;
         this.PerformActionIfChosen = PerformActionIfChosen;
         this.Ped = Ped;
+        if (Ped == null)
+        {
+            throw new ArgumentNullException("Ped cannot be null");
+        }
     }
     
     public Node(string Value,Action<Ped> PerformActionIfChosen,Ped Ped,bool EndsConversation)
@@ -40,6 +44,10 @@ public class Node
         this.EndsConversation = EndsConversation;
         this.PerformActionIfChosen = PerformActionIfChosen;
         this.Ped = Ped;
+        if (Ped == null)
+        {
+            throw new ArgumentNullException("Ped cannot be null");
+        }
     }
 
 }
