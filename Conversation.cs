@@ -42,18 +42,21 @@ public class Conversation
     internal GameFiber ConversationThread;
 
     private static DateTime lastTimePressed = DateTime.MinValue;
+    
+    public Ped Ped { get; set; }
 
     /// <summary>
     /// Initializes an instance of the Conversation object 
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(DialogueGraph graph)
+    public Conversation(DialogueGraph graph, Ped Ped)
     {
         Graph = graph;
         NumberOfNegative = 0;
         NumberOfNeutral = 0;
         NumberOfPositive = 0;
+        this.Ped = Ped;
     }
     
     
@@ -62,7 +65,7 @@ public class Conversation
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(DialogueGraph graph,bool useNumpadKeys)
+    public Conversation(DialogueGraph graph,bool useNumpadKeys, Ped Ped)
     {
         Graph = graph;
         NumberOfNegative = 0;
@@ -72,6 +75,7 @@ public class Conversation
         {
             _validKeys = _numpadKeys;
         }
+        this.Ped = Ped;
     }
     
     
@@ -139,7 +143,7 @@ public class Conversation
                     DisplayDialogueEnd();
                     break;
                 }
-                AnswerNode chosenAnswer = qNode.ChooseAnswer(Graph);
+                AnswerNode chosenAnswer = qNode.ChooseAnswer(this);
                 OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
                 UpdateNumbers(qNode.Effect);
                 Game.HideHelp();
@@ -181,7 +185,7 @@ public class Conversation
     
     internal virtual void OnQuestionChosen(AnswerNode chosenAnswerNode)
     {
-        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Graph.Ped);
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
         if(Graph.nodes.Count == 0) DisplayDialogueEnd();

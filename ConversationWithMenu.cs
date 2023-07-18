@@ -10,7 +10,7 @@ public class ConversationWithMenu : Conversation
 {
     public UIMenu ConversationMenu { get; set; }
 
-    public ConversationWithMenu(DialogueGraph graph, UIMenu ConversationMenu) : base(graph)
+    public ConversationWithMenu(DialogueGraph graph, Ped ped,UIMenu ConversationMenu) : base(graph, ped)
     {
         this.ConversationMenu = ConversationMenu;
     }
@@ -59,7 +59,7 @@ public class ConversationWithMenu : Conversation
                 DisplayDialogueEnd();
                 return;
             }
-            AnswerNode chosenAnswerNode = qNode.ChooseAnswer(Graph);
+            AnswerNode chosenAnswerNode = qNode.ChooseAnswer(this);
             InvokeEvent((qNode, chosenAnswerNode));
             UpdateNumbers(qNode.Effect);
             Game.DisplaySubtitle(chosenAnswerNode.Value);
@@ -75,7 +75,7 @@ public class ConversationWithMenu : Conversation
     
     internal override void OnQuestionChosen(AnswerNode chosenAnswerNode)
     {
-        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Graph.Ped);
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
         if(Graph.nodes.Count == 0) DisplayDialogueEnd();
