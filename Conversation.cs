@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using Rage;
 using Rage.Native;
-using RAGENativeUI;
-using RAGENativeUI.Elements;
 
 namespace DialogueSystem;
 
@@ -26,9 +25,9 @@ public class Conversation
     /// <summary>
     /// List of question pools. This will be looped through in the Run() method.
     /// </summary>
-    public List<QuestionPool> Dialogue { get; set; }
+    public DialogueGraph Graph { get; set; }
     
-    public event EventHandler<QuestionAndAnswer> OnQuestionSelect;
+    public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
     private static Keys[] _validKeys = new[]
     {
@@ -41,14 +40,38 @@ public class Conversation
     };
 
     internal GameFiber ConversationThread;
+
+    private static DateTime lastTimePressed = DateTime.MinValue;
+    
+    public Ped Ped { get; set; }
+
     /// <summary>
     /// Initializes an instance of the Conversation object 
     /// </summary>
     /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
     /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
-    public Conversation(List<QuestionPool> dialogue,bool useNumpadKeys)
+    public Conversation(DialogueGraph graph, Ped Ped)
     {
-        this.Dialogue = dialogue;
+        Graph = graph;
+        NumberOfNegative = 0;
+        NumberOfNeutral = 0;
+        NumberOfPositive = 0;
+        this.Ped = Ped;
+        if (Ped == null)
+        {
+            throw new ArgumentNullException("Ped cannot be null");
+        }
+    }
+    
+    
+    /// <summary>
+    /// Initializes an instance of the Conversation object 
+    /// </summary>
+    /// <param name="dialouge">This is the dialogue that you want to take place. It has to be a <code>List<QuestionPool></code>.</param>
+    /// <param name="useNumpadKeys">This is a boolean to either use numpad keys or not. This could be part of an ini setting.</param>
+    public Conversation(DialogueGraph graph,bool useNumpadKeys, Ped Ped)
+    {
+        Graph = graph;
         NumberOfNegative = 0;
         NumberOfNeutral = 0;
         NumberOfPositive = 0;
@@ -56,9 +79,15 @@ public class Conversation
         {
             _validKeys = _numpadKeys;
         }
+        this.Ped = Ped;
+        if (Ped == null)
+        {
+            throw new ArgumentNullException("Ped cannot be null");
+        }
     }
     
-    private void UpdateNumbers(QuestionEffect effect)
+    
+    internal void UpdateNumbers(QuestionEffect effect)
     {
         switch (effect)
         {
@@ -73,8 +102,8 @@ public class Conversation
                 break;
         }
     }
-    
-    private int WaitForValidKeyPress(QuestionPool q)
+
+    private int WaitForValidKeyPress()
     {
         bool isValidKeyPressed = false;
         int indexPressed = 0;
@@ -82,10 +111,15 @@ public class Conversation
         while (!isValidKeyPressed)
         {
             GameFiber.Yield();
+            if (DateTime.Now < lastTimePressed.AddSeconds(2.5))
+            {
+                continue;
+            }
+            lastTimePressed = DateTime.Now;
             for (int i = 0; i < _validKeys.Length; i++)
             {
                 Keys key = _validKeys[i];
-                if (Game.IsKeyDown(key) && q.IsValidIndex(i))
+                if (Game.IsKeyDown(key) && Graph.IsValidIndex(i))
                 {
                     isValidKeyPressed = true;
                     indexPressed = i;
@@ -99,135 +133,70 @@ public class Conversation
 
     /// <summary>
     /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
-    /// Each pool will iterate <paramref name="numberOfQuestionsToAskPerPool"/> times.
-    /// <param name="numberOfQuestionsToAskPerPool">number of times each pool will iterate</param>
     /// </summary>
-    public void Run(int numberOfQuestionsToAskPerPool, bool remove =false)
+    public virtual void Run()
     {
-        if (!remove)
-        {
-            RunRemoveAfterEachQuestion(numberOfQuestionsToAskPerPool);
-            return;
-        }
         ConversationThread = GameFiber.StartNew(delegate
         {
-            foreach (QuestionPool q in Dialogue)
+            while (true)
             {
-                for (int i = 0; i < numberOfQuestionsToAskPerPool; i++)
+                GameFiber.Yield();
+                Game.DisplayHelp(Graph.DisplayQuestions(), 10000);
+                var indexPressed = WaitForValidKeyPress();
+                QuestionNode qNode = Graph.nodes[indexPressed];
+                Game.HideHelp();
+                Game.DisplaySubtitle(qNode.Value);
+                if (qNode.EndsConversation)
                 {
-                    if (q.Pool.Count == 0) {break;}
-                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
-                    int indexPressed = WaitForValidKeyPress(q);
-                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
-                    Game.HideHelp();
-                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
-                    UpdateNumbers(q.GetEffect(indexPressed));
+                    DisplayDialogueEnd();
+                    break;
                 }
+                AnswerNode chosenAnswer = qNode.ChooseAnswer(this);
+                OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
+                UpdateNumbers(qNode.Effect);
+                Game.HideHelp();
+                Game.DisplaySubtitle(chosenAnswer.Value);
+                if (chosenAnswer.EndsConversation)
+                {
+                    DisplayDialogueEnd();
+                    OnQuestionChosen(chosenAnswer);
+                    break;
+                }
+                OnQuestionChosen(chosenAnswer);
             }
+
         });
     }
     
-    /// <summary>
-    /// This method runs the dialogue in a new GameFiber. This method will iterate through all your question pools and updates the number of question integers for each category.
-    /// </summary>
-    public void Run(bool remove =false)
-    {
-        if (!remove)
-        {
-            RunRemoveAfterEachQuestion();
-            return;
-        }
-        ConversationThread = GameFiber.StartNew(delegate
-        {
-            foreach (QuestionPool q in Dialogue)
-            {
-                for (int i = 0; i < q.Pool.Count; i++)
-                {
-                    if (q.Pool.Count == 0) {break;}
-                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
-                    int indexPressed = WaitForValidKeyPress(q);
-                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
-                    Game.HideHelp();
-                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
-                    UpdateNumbers(q.GetEffect(indexPressed));
-                }
-            }
-        });
-    }
-
-    private void RunRemoveAfterEachQuestion(int numberOfQuestionsToAskPerPool)
-    {
-        ConversationThread = GameFiber.StartNew(delegate
-        {
-            foreach (QuestionPool q in Dialogue)
-            {
-                for (int i = 0; i < numberOfQuestionsToAskPerPool; i++)
-                {
-                    if (q.Pool.Count == 0) {break;}
-                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
-                    int indexPressed = WaitForValidKeyPress(q);
-                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
-                    Game.HideHelp();
-                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
-                    UpdateNumbers(q.GetEffect(indexPressed));
-                    q.RemoveQuestionAnswer(indexPressed);
-                }
-            }
-        });
-    }
-    private void RunRemoveAfterEachQuestion()
-    {
-        ConversationThread = GameFiber.StartNew(delegate
-        {
-            foreach (QuestionPool q in Dialogue)
-            {
-                for (int i = 0; i < q.Pool.Count; i++)
-                {
-                    if (q.Pool.Count == 0) {break;}
-                    Game.DisplayHelp(q.DisplayQuestions(), 10000);
-                    int indexPressed = WaitForValidKeyPress(q);
-                    OnQuestionSelect?.Invoke(this,q.Pool[indexPressed]);
-                    Game.HideHelp();
-                    Game.DisplaySubtitle(q.GetAnswer(indexPressed));
-                    UpdateNumbers(q.GetEffect(indexPressed));
-                    q.RemoveQuestionAnswer(indexPressed);
-                }
-            }
-        });
-    }
-
     public void InterruptConversation()
     {
-        Game.HideHelp();
-        if(ConversationThread.IsAlive) {ConversationThread.Abort();}
-    }
-    
-    
-    /// <summary>
-    /// This method will add all your questions from a question pool to the menu specified.
-    /// </summary>
-    /// <param name="menu">Menu you want to add the question to</param>
-    /// <param name="q">Question pool the questions will be grabbed from</param>
-    public void AddQuestionsToMenu(UIMenu menu, QuestionPool q)
-    {
-        foreach (QuestionAndAnswer qanda in q.Pool)
+        try
         {
-            menu.AddItem(new UIMenuItem(qanda.Question));
+            Game.HideHelp();
+            if (ConversationThread.IsAlive) ConversationThread.Abort();
+        }
+        catch (ThreadAbortException)
+        {
+            Game.LogTrivial("Conversation interrupted");            
         }
     }
     
-    /// <summary>
-    /// This method can be ran during the OnItemSelect event in RageNativeUI.
-    /// This will display the answer to the question clicked and update the number of question integers accordingly.
-    /// </summary>
-    /// <param name="index">Index of menu button selected</param>
-    /// <param name="q">Question pool that the question was asked from</param>
-    public void OnItemSelect(int index, QuestionPool q, bool removeQuestion)
+    internal void InvokeEvent((QuestionNode, AnswerNode) e)
     {
-        OnQuestionSelect?.Invoke(this,q.Pool[index]);
-        Game.DisplaySubtitle(q.GetAnswer(index));
-        UpdateNumbers(q.GetEffect(index));
-        if(removeQuestion) q.RemoveQuestionAnswer(index);
+        OnQuestionSelect?.Invoke(this,e);
+    }
+
+    internal virtual void DisplayDialogueEnd()
+    {
+        Game.DisplaySubtitle("~y~CONVERSATION OVER");
+    }
+    
+    internal virtual void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    {
+        if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
+        if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
     }
     
     private void EnableControlAction(int control, int action, bool enable)
