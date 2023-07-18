@@ -106,7 +106,7 @@ public class AnswerNode : Node
     
     public AnswerNode(string answer, int probability, Predicate<Ped> condition, Ped Ped, List<QuestionNode> addTheseQuestionsIfChosen, List<QuestionNode> removeQuestions ) : base(answer)
     {
-        Condition = Condition;
+        Condition = condition;
         Probability = probability;
         base.Ped = Ped;
         AddTheseQuestionsIfChosen = addTheseQuestionsIfChosen;
