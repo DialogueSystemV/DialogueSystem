@@ -26,28 +26,24 @@ public class QuestionNode : Node
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
-        SortProbs();
     }
     
     public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool EndsConversation) : base(Value, EndsConversation)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
-        SortProbs();
     }
     
     public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, Ped ped, QuestionEffect Effect) : base(Value, PerformActionIfChosen, ped)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
-        SortProbs();
     }
     
     public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, Ped ped, QuestionEffect Effect, bool EndsConversation) : base(Value, PerformActionIfChosen, ped,EndsConversation)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
-        SortProbs();
     }
     
     internal AnswerNode ChooseAnswer()
