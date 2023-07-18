@@ -15,6 +15,10 @@ public class DialogueGraph
     {
         this.nodes = nodes;
         Ped = ped;
+        if (ped == null)
+        {
+            throw new ArgumentNullException("Ped is null");
+        }
     }
     
     internal void RemoveQuestions(List<QuestionNode> questionsToRemove)
