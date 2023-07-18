@@ -48,13 +48,13 @@ public class QuestionNode : Node
         PossibleAnswers = possibleAnswers;
     }
     
-    internal AnswerNode ChooseAnswer(DialogueGraph graph)
+    internal AnswerNode ChooseAnswer(Conversation convo)
     {
         List<AnswerNode> AnswersThatMeetCondition = new List<AnswerNode>();
         int max = -100;
         foreach (AnswerNode PA in PossibleAnswers)
         {
-            if (PA.Condition != null && PA.Condition(graph.Ped))
+            if (PA.Condition != null && PA.Condition(convo.Ped))
             {
                 AnswersThatMeetCondition.Add(PA);
                 if (PA.Probability > max)
