@@ -150,6 +150,7 @@ public class Conversation
                     OnQuestionChosen(chosenAnswer);
                     break;
                 }
+                OnQuestionChosen(chosenAnswer);
             }
 
         });

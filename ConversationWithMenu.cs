@@ -69,6 +69,7 @@ public class ConversationWithMenu : Conversation
                 OnQuestionChosen(chosenAnswerNode); 
                 return;
             }
+            OnQuestionChosen(chosenAnswerNode);
         });
     }
     
