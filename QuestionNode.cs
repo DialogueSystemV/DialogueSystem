@@ -20,32 +20,38 @@ public class QuestionNode : Node
         }
     }
 
+    public bool RemoveAfterAsked { get; set; }
+
     internal List<int> defaultProbs = new();
     internal int defaultProbMax = -100;
 
     internal Random rndm = new(DateTime.Now.Millisecond);
-    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect) : base(Value)
+    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool removeAfterAsked) : base(Value)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
     }
     
-    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool EndsConversation) : base(Value, EndsConversation)
+    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool EndsConversation, bool removeAfterAsked) : base(Value, EndsConversation)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
     }
     
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect) : base(Value, PerformActionIfChosen)
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool removeAfterAsked) : base(Value, PerformActionIfChosen)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
     }
     
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool EndsConversation) : base(Value, PerformActionIfChosen, EndsConversation)
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool EndsConversation, bool removeAfterAsked) : base(Value, PerformActionIfChosen, EndsConversation)
     {
         this.Effect = Effect;
         PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
     }
     
     internal AnswerNode ChooseAnswer(Conversation convo)

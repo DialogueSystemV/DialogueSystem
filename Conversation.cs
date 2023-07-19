@@ -151,6 +151,10 @@ public class Conversation
                     DisplayDialogueEnd();
                     break;
                 }
+                if (qNode.RemoveAfterAsked)
+                {
+                    Graph.RemoveQuestions(new List<QuestionNode>(){qNode});
+                }
                 AnswerNode chosenAnswer = qNode.ChooseAnswer(this);
                 OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
                 UpdateNumbers(qNode.Effect);

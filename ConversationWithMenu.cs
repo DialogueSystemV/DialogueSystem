@@ -59,6 +59,10 @@ public class ConversationWithMenu : Conversation
                 DisplayDialogueEnd();
                 return;
             }
+            if (qNode.RemoveAfterAsked)
+            {
+                RemoveQuestionsFromMenu(new List<QuestionNode>(){qNode});
+            }
             AnswerNode chosenAnswerNode = qNode.ChooseAnswer(this);
             InvokeEvent((qNode, chosenAnswerNode));
             UpdateNumbers(qNode.Effect);
