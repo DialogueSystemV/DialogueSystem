@@ -84,4 +84,36 @@ public class QuestionNode : Node
         defaultProbMax = defaultProbs.Max();
     }
 
+    public void InsertVariablesIntoString(string[] replacements)
+    {
+        for (int i = 0; i < PossibleAnswers.Count;i++)
+        {
+            AnswerNode node = PossibleAnswers[i];
+            for (int j = 0; j < replacements.Length; j++)
+            {
+                if (i == 0)
+                {
+                    Value = Value.Replace(j.ToString(), replacements[j]); //replacing the question node if it is the first iteration of the outer loop
+                }
+                node.Value = node.Value.Replace(j.ToString(), replacements[j]); //replace the ansewr node no matter what iteration of the outer loop we are on
+            }     
+        }
+    }
+    
+    public void InsertVariablesIntoString(string[] wordsToReplace,string[] replacements)
+    {
+        for (int i =0; i < PossibleAnswers.Count;i++)
+        {
+            AnswerNode node = PossibleAnswers[i];
+            for (int j = 0; j < replacements.Length; j++)
+            {
+                if (i == 0)
+                {
+                    Value = Value.Replace(wordsToReplace[j], replacements[j]); //same as above. we are just using the array "wordsToReplace if the dev does not like using numbers 0 to arrayLength
+                }
+                node.Value = node.Value.Replace(wordsToReplace[j], replacements[j]);
+            }     
+        }
+    }
+
 }
