@@ -11,18 +11,6 @@ namespace DialogueSystem;
 public class Conversation
 {
     /// <summary>
-    /// Number of positive questions asked by the player. The starting value is 0.
-    /// </summary>
-    public int NumberOfPositive { get; private set; }
-    /// <summary>
-    /// Number of negative questions asked by the player. The starting value is 0.
-    /// </summary>
-    public int NumberOfNegative { get; private set; }
-    /// <summary>
-    /// Number of neutral questions asked by the player. The starting value is 0.
-    /// </summary>
-    public int NumberOfNeutral { get; private set; }
-    /// <summary>
     /// List of question pools. This will be looped through in the Run() method.
     /// </summary>
     public DialogueGraph Graph { get; set; }
@@ -53,9 +41,6 @@ public class Conversation
     public Conversation(DialogueGraph graph, Ped Ped)
     {
         Graph = graph;
-        NumberOfNegative = 0;
-        NumberOfNeutral = 0;
-        NumberOfPositive = 0;
         this.Ped = Ped;
         if (Ped == null)
         {
@@ -72,9 +57,6 @@ public class Conversation
     public Conversation(DialogueGraph graph,bool useNumpadKeys, Ped Ped)
     {
         Graph = graph;
-        NumberOfNegative = 0;
-        NumberOfNeutral = 0;
-        NumberOfPositive = 0;
         if (useNumpadKeys)
         {
             _validKeys = _numpadKeys;
@@ -83,23 +65,6 @@ public class Conversation
         if (Ped == null)
         {
             throw new ArgumentNullException("Ped cannot be null");
-        }
-    }
-    
-    
-    internal void UpdateNumbers(QuestionEffect effect)
-    {
-        switch (effect)
-        {
-            case QuestionEffect.Positive:
-                NumberOfPositive++;
-                break;
-            case QuestionEffect.Neutral:
-                NumberOfNeutral++;
-                break;
-            case QuestionEffect.Negative:
-                NumberOfNegative++;
-                break;
         }
     }
 
@@ -157,7 +122,6 @@ public class Conversation
                 }
                 AnswerNode chosenAnswer = qNode.ChooseAnswer(this);
                 OnQuestionSelect?.Invoke(this, (qNode, chosenAnswer));
-                UpdateNumbers(qNode.Effect);
                 Game.HideHelp();
                 Game.DisplaySubtitle(chosenAnswer.Value);
                 if (chosenAnswer.EndsConversation)

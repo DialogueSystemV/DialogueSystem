@@ -56,6 +56,7 @@
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="QuestionEffect.cs" />
         <Compile Include="QuestionNode.cs" />
+        <Compile Include="TrustSystem.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />

@@ -65,7 +65,6 @@ public class ConversationWithMenu : Conversation
             }
             AnswerNode chosenAnswerNode = qNode.ChooseAnswer(this);
             InvokeEvent((qNode, chosenAnswerNode));
-            UpdateNumbers(qNode.Effect);
             Game.DisplaySubtitle(chosenAnswerNode.Value);
             if (chosenAnswerNode.EndsConversation)
             {
