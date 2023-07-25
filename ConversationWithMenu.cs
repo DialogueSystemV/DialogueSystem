@@ -99,6 +99,7 @@ public class ConversationWithMenu : Conversation
     internal override void DisplayDialogueEnd()
     {
         ConversationMenu.Close();
+        ConversationMenu.OnItemSelect -= OnItemSelect;
         base.DisplayDialogueEnd();
     }
     
