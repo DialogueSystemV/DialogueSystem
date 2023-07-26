@@ -15,15 +15,15 @@ public class TrustSystem
     /// <summary>
     /// Number of positive questions asked by the player. The starting value is 0.
     /// </summary>
-    public int NumberOfPositive { get; internal set; }
+    internal int NumberOfPositive { get; set; }
     /// <summary>
     /// Number of negative questions asked by the player. The starting value is 0.
     /// </summary>
-    public int NumberOfNegative { get; internal set; }
+    internal int NumberOfNegative { get; set; }
     /// <summary>
     /// Number of neutral questions asked by the player. The starting value is 0.
     /// </summary>
-    public int NumberOfNeutral { get; internal set; }
+    internal int NumberOfNeutral { get; set; }
     
     /// <summary>
     /// A dictionary in order to apply different weightages to the different question effects.
