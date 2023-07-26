@@ -127,10 +127,10 @@ public class Conversation
                 if (chosenAnswer.EndsConversation)
                 {
                     EndDialogue();
-                    OnQuestionChosen(chosenAnswer);
+                    OnQuestionChosen(qNode);
                     break;
                 }
-                OnQuestionChosen(chosenAnswer);
+                OnQuestionChosen(qNode);
             }
 
         });
@@ -159,16 +159,26 @@ public class Conversation
         OnQuestionSelect?.Invoke(this,e);
     }
 
-    internal virtual void EndDialogue()
+    public virtual void EndDialogue()
     {
         Game.DisplaySubtitle("~y~CONVERSATION OVER");
+        foreach (var node in Graph.nodes)
+        {
+            node.chosenAnswer = null;
+            node.QuestionAskedAlready = false;
+        }
+        Graph.nodes.Clear();
+        Graph.allNodes.Clear();
     }
     
-    internal virtual void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    internal virtual void OnQuestionChosen(QuestionNode qNode)
     {
+        if (qNode.QuestionAskedAlready) return;
+        var chosenAnswerNode = qNode.chosenAnswer;
         if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        qNode.QuestionAskedAlready = true;
         if(Graph.nodes.Count == 0) EndDialogue();
     }
     

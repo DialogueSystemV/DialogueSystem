@@ -40,13 +40,10 @@ public class ConversationWithMenu : Conversation
     internal void RemoveQuestionsFromMenu(List<QuestionNode> questionsToRemove)
     {
         Graph.RemoveQuestions(questionsToRemove);
-        List<UIMenuItem> newItems = new();
-        foreach (QuestionNode n in Graph.nodes)
+        foreach (var item in ConversationMenu.MenuItems)
         {
-            newItems.Add(new UIMenuItem(n.Value));
+            //need to fix
         }
-        ConversationMenu.MenuItems = newItems;
-        ConversationMenu.RefreshIndex();
     }
 
     internal void OnItemSelect(UIMenu sender, UIMenuItem selecteditem, int index)
@@ -69,18 +66,21 @@ public class ConversationWithMenu : Conversation
             if (chosenAnswerNode.EndsConversation)
             {
                 EndDialogue();
-                OnQuestionChosen(chosenAnswerNode); 
+                OnQuestionChosen(qNode); 
                 return;
             }
-            OnQuestionChosen(chosenAnswerNode);
+            OnQuestionChosen(qNode);
         });
     }
     
-    internal override void OnQuestionChosen(AnswerNode chosenAnswerNode)
+    internal override void OnQuestionChosen(QuestionNode qNode)
     {
+        if (qNode.QuestionAskedAlready) return;
+        var chosenAnswerNode = qNode.chosenAnswer;
         if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
+        qNode.QuestionAskedAlready = true;
         if(Graph.nodes.Count == 0) EndDialogue();
     }
 
@@ -88,6 +88,7 @@ public class ConversationWithMenu : Conversation
     public void Activate()
     {
         ConversationMenu.OnItemSelect += OnItemSelect;
+        ConversationMenu.Clear();
         AddQuestionsToMenu();
     }
 
@@ -109,8 +110,9 @@ public class ConversationWithMenu : Conversation
         Activate();
     }
 
-    internal override void EndDialogue()
+    public override void EndDialogue()
     {
+        ConversationMenu.Clear();
         ConversationMenu.Close();
         ConversationMenu.OnItemSelect -= OnItemSelect;
         base.EndDialogue();

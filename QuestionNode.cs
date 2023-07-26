@@ -8,23 +8,12 @@ namespace DialogueSystem;
 public class QuestionNode : Node
 {
     public QuestionEffect Effect { get; set; }
+    public List<AnswerNode> PossibleAnswers { get; set; }
 
-    private List<AnswerNode> _possibleAnswers;
-    public List<AnswerNode> PossibleAnswers
-    {
-        get { return _possibleAnswers; }
-        set
-        {
-            _possibleAnswers = value;
-            SortProbs();
-        }
-    }
-
+    internal AnswerNode chosenAnswer = null;
+    internal bool QuestionAskedAlready = false;
     public bool RemoveAfterAsked { get; set; }
-
-    internal List<int> defaultProbs = new();
-    internal int defaultProbMax = -100;
-
+    
     internal Random rndm = new(DateTime.Now.Millisecond);
     public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool removeAfterAsked) : base(Value)
     {
@@ -82,33 +71,19 @@ public class QuestionNode : Node
     
     internal AnswerNode ChooseAnswer(Conversation convo)
     {
-        List<AnswerNode> AnswersThatMeetCondition = new List<AnswerNode>();
-        int max = -100;
-        foreach (AnswerNode PA in PossibleAnswers)
+        if (chosenAnswer != null) return chosenAnswer;
+        List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
+        EnabledAnswers = PossibleAnswers.FindAll(PA => PA.Condition == null || PA.Condition(convo.Ped));
+        if (EnabledAnswers.Count == 0)
         {
-            if (PA.Condition != null && PA.Condition(convo.Ped))
-            {
-                AnswersThatMeetCondition.Add(PA);
-                if (PA.Probability > max)
-                {
-                    max = PA.Probability;
-                }
-            }
+            throw new NoValidAnswerException($"No Valid Answer for Question Node: {Value}");
         }
-        return AnswersThatMeetCondition.Count == 0 
-            ? PossibleAnswers[rndm.Next(PossibleAnswers.RemoveAll(item => item.Probability < defaultProbMax))]
-            : AnswersThatMeetCondition[rndm.Next(AnswersThatMeetCondition.RemoveAll(item => item.Probability < max))];
+        double maxProbability = EnabledAnswers.Max(node => node.Probability);
+        List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.Probability == maxProbability).ToList();
+        chosenAnswer = nodesWithHighestProbability[rndm.Next(nodesWithHighestProbability.Count)];
+        return chosenAnswer;
     }
 
-    internal void SortProbs()
-    {
-        PossibleAnswers.OrderByDescending(item => item.Probability);
-        foreach (AnswerNode PA in PossibleAnswers)
-        {
-            defaultProbs.Add(PA.Probability);
-        }
-        defaultProbMax = defaultProbs.Max();
-    }
 
     public void InsertVariablesIntoString(string[] replacements)
     {

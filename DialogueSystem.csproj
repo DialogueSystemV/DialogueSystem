@@ -52,6 +52,7 @@
         <Compile Include="ConversationWithMenu.cs" />
         <Compile Include="DialogueGraph.cs" />
         <Compile Include="AnswerNode.cs" />
+        <Compile Include="Extensions.cs" />
         <Compile Include="Node.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="QuestionEffect.cs" />
