@@ -113,7 +113,7 @@ public class Conversation
                 Game.DisplaySubtitle(qNode.Value);
                 if (qNode.EndsConversation)
                 {
-                    DisplayDialogueEnd();
+                    EndDialogue();
                     break;
                 }
                 if (qNode.RemoveAfterAsked)
@@ -126,7 +126,7 @@ public class Conversation
                 Game.DisplaySubtitle(chosenAnswer.Value);
                 if (chosenAnswer.EndsConversation)
                 {
-                    DisplayDialogueEnd();
+                    EndDialogue();
                     OnQuestionChosen(chosenAnswer);
                     break;
                 }
@@ -136,7 +136,7 @@ public class Conversation
         });
     }
     
-    public void InterruptConversation()
+    public virtual void PauseConversation()
     {
         try
         {
@@ -148,13 +148,18 @@ public class Conversation
             Game.LogTrivial("Conversation interrupted");            
         }
     }
+
+    public virtual void ResumeConversation()
+    {
+        Run();
+    }
     
     internal void InvokeEvent((QuestionNode, AnswerNode) e)
     {
         OnQuestionSelect?.Invoke(this,e);
     }
 
-    internal virtual void DisplayDialogueEnd()
+    internal virtual void EndDialogue()
     {
         Game.DisplaySubtitle("~y~CONVERSATION OVER");
     }
@@ -164,7 +169,7 @@ public class Conversation
         if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
-        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
+        if(Graph.nodes.Count == 0) EndDialogue();
     }
     
     private void EnableControlAction(int control, int action, bool enable)
