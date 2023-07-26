@@ -33,9 +33,22 @@ public class QuestionNode : Node
         RemoveAfterAsked = removeAfterAsked;
     }
     
+    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, bool removeAfterAsked) : base(Value)
+    {
+        Effect = QuestionEffect.Neutral;
+        PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
+    }
+    
     public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool EndsConversation, bool removeAfterAsked) : base(Value, EndsConversation)
     {
         this.Effect = Effect;
+        PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
+    }
+    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, bool EndsConversation, bool removeAfterAsked) : base(Value, EndsConversation)
+    {
+        Effect = QuestionEffect.Neutral;
         PossibleAnswers = possibleAnswers;
         RemoveAfterAsked = removeAfterAsked;
     }
@@ -46,10 +59,23 @@ public class QuestionNode : Node
         PossibleAnswers = possibleAnswers;
         RemoveAfterAsked = removeAfterAsked;
     }
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, bool removeAfterAsked) : base(Value, PerformActionIfChosen)
+    {
+        Effect = QuestionEffect.Neutral;
+        PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
+    }
     
     public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool EndsConversation, bool removeAfterAsked) : base(Value, PerformActionIfChosen, EndsConversation)
     {
         this.Effect = Effect;
+        PossibleAnswers = possibleAnswers;
+        RemoveAfterAsked = removeAfterAsked;
+    }
+    
+    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, bool EndsConversation, bool removeAfterAsked) : base(Value, PerformActionIfChosen, EndsConversation)
+    {
+        Effect = QuestionEffect.Neutral;
         PossibleAnswers = possibleAnswers;
         RemoveAfterAsked = removeAfterAsked;
     }
