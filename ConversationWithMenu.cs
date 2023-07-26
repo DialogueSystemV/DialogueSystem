@@ -56,7 +56,7 @@ public class ConversationWithMenu : Conversation
             QuestionNode qNode = Graph.nodes[index];
             if (qNode.EndsConversation)
             {
-                DisplayDialogueEnd();
+                EndDialogue();
                 return;
             }
             if (qNode.RemoveAfterAsked)
@@ -68,7 +68,7 @@ public class ConversationWithMenu : Conversation
             Game.DisplaySubtitle(chosenAnswerNode.Value);
             if (chosenAnswerNode.EndsConversation)
             {
-                DisplayDialogueEnd();
+                EndDialogue();
                 OnQuestionChosen(chosenAnswerNode); 
                 return;
             }
@@ -81,7 +81,7 @@ public class ConversationWithMenu : Conversation
         if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
-        if(Graph.nodes.Count == 0) DisplayDialogueEnd();
+        if(Graph.nodes.Count == 0) EndDialogue();
     }
 
 
@@ -91,16 +91,29 @@ public class ConversationWithMenu : Conversation
         AddQuestionsToMenu();
     }
 
+
+    public override void PauseConversation()
+    {
+        ConversationMenu.Close();
+        ConversationMenu.OnItemSelect -= OnItemSelect;
+    }
+
+    public override void ResumeConversation()
+    {
+        ConversationMenu.Visible = true;
+        ConversationMenu.OnItemSelect += OnItemSelect;
+    }
+
     public override void Run()
     {
         Activate();
     }
 
-    internal override void DisplayDialogueEnd()
+    internal override void EndDialogue()
     {
         ConversationMenu.Close();
         ConversationMenu.OnItemSelect -= OnItemSelect;
-        base.DisplayDialogueEnd();
+        base.EndDialogue();
     }
     
 }
