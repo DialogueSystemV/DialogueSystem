@@ -40,9 +40,16 @@ public class ConversationWithMenu : Conversation
     internal void RemoveQuestionsFromMenu(List<QuestionNode> questionsToRemove)
     {
         Graph.RemoveQuestions(questionsToRemove);
-        foreach (var item in ConversationMenu.MenuItems)
+        for (int i = 0; i < ConversationMenu.MenuItems.Count; i--)
         {
-            //need to fix
+            for (int j = 0; j < questionsToRemove.Count; j++)
+            {
+                if (ConversationMenu.MenuItems[i].Text.Equals(questionsToRemove[i].Value))
+                {
+                    ConversationMenu.RemoveItemAt(i);
+                    break;
+                }
+            }
         }
     }
 
@@ -70,6 +77,7 @@ public class ConversationWithMenu : Conversation
                 return;
             }
             OnQuestionChosen(qNode);
+            qNode.QuestionAskedAlready = true;
         });
     }
     
@@ -79,8 +87,7 @@ public class ConversationWithMenu : Conversation
         var chosenAnswerNode = qNode.chosenAnswer;
         if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) RemoveQuestionsFromMenu(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
-        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen);
-        qNode.QuestionAskedAlready = true;
+        if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) AddQuestionsToMenu(chosenAnswerNode.AddTheseQuestionsIfChosen); 
         if(Graph.nodes.Count == 0) EndDialogue();
     }
 
@@ -101,8 +108,8 @@ public class ConversationWithMenu : Conversation
 
     public override void ResumeConversation()
     {
-        ConversationMenu.Visible = true;
         ConversationMenu.OnItemSelect += OnItemSelect;
+        ConversationMenu.Visible = true;
     }
 
     public override void Run()

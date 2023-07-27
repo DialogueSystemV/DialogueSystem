@@ -131,6 +131,7 @@ public class Conversation
                     break;
                 }
                 OnQuestionChosen(qNode);
+                qNode.QuestionAskedAlready = true;
             }
 
         });
@@ -178,7 +179,6 @@ public class Conversation
         if(chosenAnswerNode.PerformActionIfChosen != null) chosenAnswerNode.PerformActionIfChosen(Ped);
         if(chosenAnswerNode.RemoveTheseQuestionsIfChosen.Count != 0) Graph.RemoveQuestions(chosenAnswerNode.RemoveTheseQuestionsIfChosen);
         if(chosenAnswerNode.AddTheseQuestionsIfChosen.Count != 0) Graph.AddQuestions(chosenAnswerNode.AddTheseQuestionsIfChosen);
-        qNode.QuestionAskedAlready = true;
         if(Graph.nodes.Count == 0) EndDialogue();
     }
     
