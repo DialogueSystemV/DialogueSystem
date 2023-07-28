@@ -40,17 +40,8 @@ public class ConversationWithMenu : Conversation
     internal void RemoveQuestionsFromMenu(List<QuestionNode> questionsToRemove)
     {
         Graph.RemoveQuestions(questionsToRemove);
-        for (int i = 0; i < ConversationMenu.MenuItems.Count; i--)
-        {
-            for (int j = 0; j < questionsToRemove.Count; j++)
-            {
-                if (ConversationMenu.MenuItems[i].Text.Equals(questionsToRemove[i].Value))
-                {
-                    ConversationMenu.RemoveItemAt(i);
-                    break;
-                }
-            }
-        }
+        ConversationMenu.Clear();
+        AddQuestionsToMenu();
     }
 
     internal void OnItemSelect(UIMenu sender, UIMenuItem selecteditem, int index)

@@ -19,11 +19,12 @@ public class DialogueGraph
     
     internal void RemoveQuestions(List<QuestionNode> questionsToRemove)
     {
-        foreach (QuestionNode node in nodes)
+        for (int i = nodes.Count - 1; i >= 0; i--)
         {
+            QuestionNode node = nodes[i];
             if (questionsToRemove.Contains(node))
             {
-                nodes.Remove(node);
+                nodes.RemoveAt(i);
             }
         }
     }
