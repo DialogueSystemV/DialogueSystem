@@ -6,19 +6,21 @@ namespace csharpdsa
 {
     public class Graph
     {
-        public HashSet<Edge> edges;
-        public List<QuestionNode> nodes;
-        public bool[,] adjList;
+        public HashSet<Edge> edges { get; private set; }
+        public List<QuestionNode> nodes { get; private set; }
+        public bool[,] adjList { get; private set; }
+        public GraphConfig vars {get; set;}
 
-
-        public Graph(List<QuestionNode> nodes, HashSet<Edge> edges)
+        public Graph(List<QuestionNode> nodes, HashSet<Edge> edges, GraphConfig config)
         {
+            vars = config;
             this.edges = new HashSet<Edge>();
             this.nodes = new List<QuestionNode>();
             AddNodes(nodes);
             adjList = new bool[this.nodes.Count, this.nodes.Count];
             AddEdges(edges);
         }
+        
 
         public void AddEdge(Edge edge)
         {

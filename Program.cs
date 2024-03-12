@@ -31,7 +31,7 @@ namespace csharpdsa
             {
                 edge1, edge2, edge3, edge4
             };
-            Graph graph = new Graph(l,f);
+            Graph graph = new Graph(l,f, new GraphConfig());
             // var adjList = graph.adjList;
             // for (int i = 0; i < adjList.GetLength(0); i++)
             // {
@@ -48,7 +48,7 @@ namespace csharpdsa
             {
                 Console.WriteLine(k.Value);                
             }
-            graph.RemoveNode(node2);
+            graph.RemoveEdge(edge3);
             Console.WriteLine("-------------------");
             var fg = graph.GetConnectedNodes(node1);
             foreach (var k in fg)
