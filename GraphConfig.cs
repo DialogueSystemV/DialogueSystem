@@ -44,4 +44,12 @@ public class GraphConfig
         }
         return true;
     }
+    
+    public void ReplaceVariables(Node node)
+    {
+        foreach (var kvp in findAndReplace)
+        {
+            node.Value = node.Value.Replace(kvp.Key, kvp.Value);
+        }
+    }
 }

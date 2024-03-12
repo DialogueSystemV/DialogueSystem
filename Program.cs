@@ -31,7 +31,9 @@ namespace csharpdsa
             {
                 edge1, edge2, edge3, edge4
             };
-            Graph graph = new Graph(l,f, new GraphConfig());
+            GraphConfig config = new GraphConfig();
+            config.AddVariable("fav", "favorite");
+            Graph graph = new Graph(l,f, config);
             // var adjList = graph.adjList;
             // for (int i = 0; i < adjList.GetLength(0); i++)
             // {
@@ -54,6 +56,13 @@ namespace csharpdsa
             foreach (var k in fg)
             {
                 Console.WriteLine(k.Value);                
+            }
+            Console.WriteLine("-------------------");
+            graph.AddEdge(edge3);
+            fg = graph.GetConnectedNodes(node1);
+            foreach (var VARIABLE in fg)
+            {
+                Console.WriteLine(VARIABLE.Value);
             }
         }
     }

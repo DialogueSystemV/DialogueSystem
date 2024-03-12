@@ -68,6 +68,8 @@ namespace csharpdsa
                 return false;
             }
             nodes.Add(n);
+            vars.ReplaceVariables(n);
+            foreach(var na in n.PossibleAnswers) {vars.ReplaceVariables(na);}
             return true;
         }
 
@@ -106,8 +108,6 @@ namespace csharpdsa
     
             return result;
         }
-        
-        
         
     }
 }
