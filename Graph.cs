@@ -28,11 +28,26 @@ namespace csharpdsa
             }
         }
 
+        public void RemoveEdge(Edge edge)
+        {
+            if (!edges.Contains(edge)) { return; }
+            adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = false;
+            edges.Remove(edge);
+        }
+
+        public void RemoveEdges(HashSet<Edge> edges)
+        {
+            foreach (Edge e in edges) 
+            {
+                RemoveEdge(e);
+            }
+        }
+
         public void AddEdges(HashSet<Edge> edges)
         {
             foreach (Edge e in edges)
             {
-                this.AddEdge(e);
+                AddEdge(e);
             }
         }
         
@@ -40,7 +55,7 @@ namespace csharpdsa
         {
             foreach (QuestionNode e in nodes)
             {
-                this.AddNode(e);
+                AddNode(e);
             }
         }
 
@@ -54,20 +69,19 @@ namespace csharpdsa
             return true;
         }
 
-        public bool RemoveNode(QuestionNode n)
+        public void RemoveNode(QuestionNode n)
         {
-            if (!nodes.Contains(n)) { return false; }
+            if (!nodes.Contains(n)) { return; }
             int index = nodes.IndexOf(n);
             nodes.RemoveAt(index);
             edges.RemoveWhere(e => e.from.Equals(n) || e.to.Equals(n));
-            adjList = new bool[this.nodes.Count, this.nodes.Count];
+            adjList = new bool[nodes.Count, nodes.Count];
             foreach (var edge in edges.ToList())
             {
                 int fromIndex = nodes.IndexOf(edge.from);
                 int toIndex = nodes.IndexOf(edge.to);
                 adjList[toIndex, fromIndex] = true;
             }
-            return true;
         }
 
         public List<QuestionNode> GetConnectedNodes(QuestionNode node)
