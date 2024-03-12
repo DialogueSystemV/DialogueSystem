@@ -6,9 +6,9 @@ namespace csharpdsa
 {
     public class Graph
     {
-        private HashSet<Edge> edges;
-        private List<QuestionNode> nodes;
-        private bool[,] adjList;
+        internal HashSet<Edge> edges;
+        internal List<QuestionNode> nodes;
+        internal bool[,] adjList;
         public GraphConfig vars {get; set;}
 
         public Graph(List<QuestionNode> nodes, HashSet<Edge> edges, GraphConfig config)
@@ -114,6 +114,5 @@ namespace csharpdsa
     
             return result;
         }
-        
     }
 }

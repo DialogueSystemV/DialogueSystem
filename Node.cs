@@ -34,7 +34,7 @@ namespace csharpdsa
             return n1.ID.Equals(n2.ID);
         }
 
-        public void ProcessEdit(Graph graph)
+        public virtual void ProcessEdit(Graph graph)
         {
             graph.RemoveEdges(edgesToRemove);
             graph.AddEdges(edgesToAdd);

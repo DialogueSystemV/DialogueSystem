@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace csharpdsa
 {
@@ -12,6 +13,9 @@ namespace csharpdsa
         private AnswerNode chosenAnswer = null;
 
         internal Random rndm = new Random(DateTime.Now.Millisecond);
+        
+        public bool RemoveQuestionAfterAsked { get; set; }
+        
         
         public QuestionNode(string Value, bool endsConversation, List<AnswerNode> possibleAnswers) : base(Value, endsConversation)
         {
@@ -41,6 +45,17 @@ namespace csharpdsa
             return chosenAnswer;
         }
 
-
+        public override void ProcessEdit(Graph graph)
+        {
+            if (RemoveQuestionAfterAsked)
+            {
+                int index = graph.nodes.IndexOf(this);
+                for (int i = 0; i < graph.adjList.GetLength(1); i++)
+                {
+                    graph.adjList[index, i] = false; 
+                }
+            }
+            base.ProcessEdit(graph);
+        }
     }
 }
