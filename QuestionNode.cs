@@ -9,7 +9,7 @@ namespace csharpdsa
         
         public List<AnswerNode> PossibleAnswers { get; set; }
 
-        internal AnswerNode chosenAnswer = null;
+        private AnswerNode chosenAnswer = null;
 
         internal Random rndm = new Random(DateTime.Now.Millisecond);
         
@@ -17,8 +17,16 @@ namespace csharpdsa
         {
             PossibleAnswers = possibleAnswers;
         }
+
+        public AnswerNode ChooseQuestion(Graph graph)
+        {
+            ProcessEdit(graph);
+            AnswerNode node = ChooseAnswer();
+            node.ProcessEdit(graph);
+            return node;
+        }
         
-        internal AnswerNode ChooseAnswer()
+        private AnswerNode ChooseAnswer()
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();

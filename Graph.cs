@@ -6,9 +6,9 @@ namespace csharpdsa
 {
     public class Graph
     {
-        public HashSet<Edge> edges { get; private set; }
-        public List<QuestionNode> nodes { get; private set; }
-        public bool[,] adjList { get; private set; }
+        private HashSet<Edge> edges;
+        private List<QuestionNode> nodes;
+        private bool[,] adjList;
         public GraphConfig vars {get; set;}
 
         public Graph(List<QuestionNode> nodes, HashSet<Edge> edges, GraphConfig config)
@@ -53,15 +53,15 @@ namespace csharpdsa
             }
         }
         
-        public void AddNodes(List<QuestionNode> nodes)
+        private void AddNodes(List<QuestionNode> nodes)
         {
             foreach (QuestionNode e in nodes)
             {
-                AddNode(e);
+                AddNode(e, true);
             }
         }
 
-        public bool AddNode(QuestionNode n)
+        private bool AddNode(QuestionNode n, bool partOfList = false)
         {
             if (nodes.Contains(n))
             {
@@ -70,15 +70,12 @@ namespace csharpdsa
             nodes.Add(n);
             vars.ReplaceVariables(n);
             foreach(var na in n.PossibleAnswers) {vars.ReplaceVariables(na);}
+            if (!partOfList) {RedoAdjList();}
             return true;
         }
 
-        public void RemoveNode(QuestionNode n)
+        private void RedoAdjList()
         {
-            if (!nodes.Contains(n)) { return; }
-            int index = nodes.IndexOf(n);
-            nodes.RemoveAt(index);
-            edges.RemoveWhere(e => e.from.Equals(n) || e.to.Equals(n));
             adjList = new bool[nodes.Count, nodes.Count];
             foreach (var edge in edges.ToList())
             {
@@ -86,6 +83,15 @@ namespace csharpdsa
                 int toIndex = nodes.IndexOf(edge.to);
                 adjList[toIndex, fromIndex] = true;
             }
+        }
+
+        private void RemoveNode(QuestionNode n)
+        {
+            if (!nodes.Contains(n)) { return; }
+            int index = nodes.IndexOf(n);
+            nodes.RemoveAt(index);
+            edges.RemoveWhere(e => e.from.Equals(n) || e.to.Equals(n));
+            RedoAdjList();
         }
 
         public List<QuestionNode> GetConnectedNodes(QuestionNode node)
