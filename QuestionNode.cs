@@ -57,6 +57,8 @@ namespace csharpdsa
             base.ProcessEdit(graph);
         }
 
+        public bool HasBeenAnswered() => chosenAnswer != null;
+
         internal void ResetChosenAnswer()
         {
             chosenAnswer = null;

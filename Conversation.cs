@@ -8,6 +8,7 @@ public class Conversation
 {
     public Graph graph { get; private set; }
     private QuestionNode currNode;
+    private QuestionNode startNode;
     private bool convoStarted;
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
@@ -15,6 +16,7 @@ public class Conversation
     {
         this.graph = graph;
         this.currNode = currNode;
+        startNode = currNode;
         convoStarted = false;
     }
     
@@ -24,16 +26,16 @@ public class Conversation
             while (true)
             {
                 var connectedNodes = graph.GetConnectedNodes(currNode);
-                if(!convoStarted || (convoStarted && !currNode.removeQuestionAfterAsked)) connectedNodes.Add(currNode);
+                if(!convoStarted || (convoStarted && !currNode.HasBeenAnswered())) connectedNodes.Add(currNode);
                 if (!convoStarted)
                 {
                     convoStarted = true;
-                    graph.startingEdges = graph.edges;
-                    graph.startingAdjList = graph.adjList;
+                    graph.startingEdges = new HashSet<Edge>(graph.edges);
+                    graph.CloneAdjList();
                 }
                 if(connectedNodes.Count == 0)
                 {
-                    Console.WriteLine("No more questions to ask");
+                    Console.WriteLine("No more questions to ask.");
                     break;
                 }
                 connectedNodes.PrintNodes();
@@ -55,16 +57,17 @@ public class Conversation
 
     private void endConvo()
     {
-        Console.WriteLine("Conversation Ended");
+        Console.WriteLine("Conversation Ended!");
         foreach(QuestionNode q in graph.nodes)
         {
             q.ResetChosenAnswer();
         }
-        graph.edges = graph.startingEdges;
-        graph.adjList = graph.startingAdjList;
         convoStarted = false;
+        graph.edges = new HashSet<Edge>(graph.startingEdges);
+        graph.CloneStartingAdjList();
+        currNode = startNode;
     }
-
+    
     private int WaitForValidKeyPress()
     {
         Console.Write($"\nInput the number of the question you want to ask: ");
