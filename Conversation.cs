@@ -13,31 +13,19 @@ public class Conversation
     private bool autoStartWithCurrNode;
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
-    public Conversation(Graph graph, QuestionNode currNode, bool autoStartWithCurrNode)
+    public Conversation(Graph graph, QuestionNode currNode)
     {
         this.graph = graph;
         this.currNode = currNode;
         startNode = currNode;
         convoStarted = false;
-        this.autoStartWithCurrNode = autoStartWithCurrNode;
     }
 
     private void Start()
     {
         if (convoStarted) return;
-        if (!autoStartWithCurrNode)
-        {
-            convoStarted = true;
-            return;
-        }
         graph.startingEdges = new HashSet<Edge>(graph.edges);
         graph.CloneAdjList();
-        Console.WriteLine(currNode.value);
-        AnswerNode answer = currNode.ChooseQuestion(graph);
-        Console.WriteLine($" --> {answer.value}");
-        Console.WriteLine();
-        OnQuestionSelect?.Invoke(this, (currNode, answer));
-        convoStarted = true;
         
     }
     
@@ -48,11 +36,8 @@ public class Conversation
         while (true)
         {
             var connectedNodes = graph.GetConnectedNodes(currNode);
-            if (!autoStartWithCurrNode && firstTime)
-            {
-                connectedNodes.Add(currNode);
-            }
             AnswerNode answer = null;
+            if(firstTime) connectedNodes.Add(currNode);
             if (connectedNodes.Count == 0)
             {
                 Console.WriteLine("No more questions to ask.");
@@ -72,6 +57,7 @@ public class Conversation
                 break;
             }
             firstTime = false;
+            convoStarted = true;
         }
         endConvo();
     }
