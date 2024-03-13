@@ -9,6 +9,8 @@ public class Conversation
     public Graph graph { get; private set; }
     private QuestionNode currNode;
     private bool convoStarted;
+    
+    
     public Conversation(Graph graph, QuestionNode currNode)
     {
         this.graph = graph;
@@ -22,7 +24,7 @@ public class Conversation
             while (true)
             {
                 var connectedNodes = graph.GetConnectedNodes(currNode);
-                if(!convoStarted || (convoStarted && !currNode.RemoveQuestionAfterAsked)) connectedNodes.Add(currNode);
+                if(!convoStarted || (convoStarted && !currNode.removeQuestionAfterAsked)) connectedNodes.Add(currNode);
                 convoStarted = true;
                 if(connectedNodes.Count == 0)
                 {
@@ -32,15 +34,15 @@ public class Conversation
                 connectedNodes.PrintNodes();
                 var indexPressed = WaitForValidKeyPress();
                 QuestionNode qNode = connectedNodes[indexPressed];
-                Console.WriteLine(qNode.Value);
+                Console.WriteLine(qNode.value);
                 AnswerNode answer = qNode.ChooseQuestion(graph);
-                if (qNode.EndsConversation)
+                if (qNode.endsConversation)
                 {
                     break;
                 }
-                Console.WriteLine($" --> {answer.Value}");
+                Console.WriteLine($" --> {answer.value}");
                 Console.WriteLine();
-                if (answer.EndsConversation)
+                if (answer.endsConversation)
                 {
                     break;
                 }

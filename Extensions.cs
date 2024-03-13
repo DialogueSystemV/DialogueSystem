@@ -23,7 +23,7 @@ public static class ListExtensions
         {
             var node = list[index];
             String s = (index == list.Count - 1) ? "" : "\n";
-            Console.Write($"{index + 1}: {node.Value}{s}");
+            Console.Write($"{index + 1}: {node.value}{s}");
         }
     }
 }

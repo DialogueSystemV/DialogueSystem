@@ -49,7 +49,7 @@ public class GraphConfig
     {
         foreach (var kvp in findAndReplace)
         {
-            node.Value = node.Value.Replace(kvp.Key, kvp.Value);
+            node.value = node.value.Replace(kvp.Key, kvp.Value);
         }
     }
 }

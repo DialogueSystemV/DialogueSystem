@@ -8,18 +8,18 @@ namespace csharpdsa
     public class QuestionNode : Node
     { 
         
-        public List<AnswerNode> PossibleAnswers { get; set; }
+        public List<AnswerNode> possibleAnswers { get; set; }
 
         private AnswerNode chosenAnswer = null;
 
         internal Random rndm = new Random(DateTime.Now.Millisecond);
         
-        public bool RemoveQuestionAfterAsked { get; set; }
+        public bool removeQuestionAfterAsked { get; set; }
         
         
-        public QuestionNode(string Value, bool endsConversation, List<AnswerNode> possibleAnswers) : base(Value, endsConversation)
+        public QuestionNode(string value, bool endsConversation, params AnswerNode[] possibleAnswers) : base(value, endsConversation)
         {
-            PossibleAnswers = possibleAnswers;
+            this.possibleAnswers = possibleAnswers.ToList();
         }
 
         public AnswerNode ChooseQuestion(Graph graph)
@@ -34,10 +34,10 @@ namespace csharpdsa
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers = PossibleAnswers.FindAll(PA => PA.Condition == null || PA.Condition(null));
+            EnabledAnswers = possibleAnswers.FindAll(PA => PA.Condition == null || PA.Condition(null));
             if (EnabledAnswers.Count == 0)
             {
-                throw new NoValidAnswerException($"No Valid Answer for Question Node: {Value}");
+                throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
             }
             double maxProbability = EnabledAnswers.Max(node => node.Probability);
             List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.Probability == maxProbability).ToList();
@@ -47,7 +47,7 @@ namespace csharpdsa
 
         public override void ProcessEdit(Graph graph)
         {
-            if (RemoveQuestionAfterAsked)
+            if (removeQuestionAfterAsked)
             {
                 int index = graph.nodes.IndexOf(this);
                 for (int i = 0; i < graph.adjList.GetLength(1); i++)

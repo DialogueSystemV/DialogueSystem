@@ -6,25 +6,25 @@ namespace csharpdsa
     public abstract class Node
     {
         private Guid ID;
-        public string Value { get; set; }
-        public bool EndsConversation { get; set; }
+        public string value { get; set; }
+        public bool endsConversation { get; set; }
         public HashSet<Edge> edgesToRemove { get; set; }
         public HashSet<Edge> edgesToAdd { get; set; }
 
         public Node(string Value, bool endsConversation)
         {
-            this.Value = Value;
+            this.value = Value;
             ID = new Guid();
-            EndsConversation = endsConversation;
+            this.endsConversation = endsConversation;
             edgesToAdd = new HashSet<Edge>();
             edgesToRemove = new HashSet<Edge>();
         }
         
         public Node(string Value)
         {
-            this.Value = Value;
+            this.value = Value;
             ID = new Guid();
-            EndsConversation = false;
+            endsConversation = false;
             edgesToAdd = new HashSet<Edge>();
             edgesToRemove = new HashSet<Edge>();
         }

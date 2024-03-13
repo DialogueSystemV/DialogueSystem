@@ -13,17 +13,17 @@ namespace csharpdsa
             AnswerNode an4 = new AnswerNode("Star Wars", 50);
             AnswerNode an5 = new AnswerNode("French Fries", 50);
             AnswerNode an6 = new AnswerNode("Idli", 50);
-            QuestionNode node1 = new QuestionNode("What is your name",false, new List<AnswerNode>(){an1, an2});
-            QuestionNode node2 = new QuestionNode("What is your fav movie", false,new List<AnswerNode>(){an3, an4});
-            QuestionNode node3 = new QuestionNode("What is your fav food", false,new List<AnswerNode>(){an5, an6});
+            QuestionNode node1 = new QuestionNode("What is your name?",false, an1, an2);
+            QuestionNode node2 = new QuestionNode("What is your fav movie?", false, an3, an4);
+            QuestionNode node3 = new QuestionNode("What is your fav food?", false, an5, an6);
             
             Edge edge1 = new Edge(node1, node2);
             Edge edge2 = new Edge(node2, node3);
             Edge edge3 = new Edge(node1, node3);
             Edge edge4 = new Edge(node2, node1);
-            node1.RemoveQuestionAfterAsked = false;
-            node2.RemoveQuestionAfterAsked = true;
-            node3.RemoveQuestionAfterAsked = true;
+            node1.removeQuestionAfterAsked = false;
+            node2.removeQuestionAfterAsked = true;
+            node3.removeQuestionAfterAsked = true;
             
             
             var l = new List<QuestionNode>()
@@ -37,6 +37,9 @@ namespace csharpdsa
             GraphConfig config = new GraphConfig();
             config.AddVariable("fav", "favorite");
             Graph graph = new Graph(l,f, config);
+
+            Conversation convo = new Conversation(graph, node1);
+            convo.Run();
             // var adjList = graph.adjList;
             // for (int i = 0; i < adjList.GetLength(0); i++)
             // {
@@ -46,9 +49,6 @@ namespace csharpdsa
             //     }
             //     Console.WriteLine();
             // }
-
-            Conversation convo = new Conversation(graph, node1);
-            convo.Run();
             // graph.RemoveEdge(edge3);
             // Console.WriteLine("-------------------");
             // var fg = graph.GetConnectedNodes(node1);

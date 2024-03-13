@@ -69,7 +69,7 @@ namespace csharpdsa
             }
             nodes.Add(n);
             vars.ReplaceVariables(n);
-            foreach(var na in n.PossibleAnswers) {vars.ReplaceVariables(na);}
+            foreach(var na in n.possibleAnswers) {vars.ReplaceVariables(na);}
             if (!partOfList) {RedoAdjList();}
             return true;
         }
