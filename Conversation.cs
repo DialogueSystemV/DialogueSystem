@@ -9,7 +9,7 @@ public class Conversation
     public Graph graph { get; private set; }
     private QuestionNode currNode;
     private bool convoStarted;
-    
+    public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
     public Conversation(Graph graph, QuestionNode currNode)
     {
@@ -25,7 +25,12 @@ public class Conversation
             {
                 var connectedNodes = graph.GetConnectedNodes(currNode);
                 if(!convoStarted || (convoStarted && !currNode.removeQuestionAfterAsked)) connectedNodes.Add(currNode);
-                convoStarted = true;
+                if (!convoStarted)
+                {
+                    convoStarted = true;
+                    graph.startingEdges = graph.edges;
+                    graph.startingAdjList = graph.adjList;
+                }
                 if(connectedNodes.Count == 0)
                 {
                     Console.WriteLine("No more questions to ask");
@@ -36,15 +41,28 @@ public class Conversation
                 QuestionNode qNode = connectedNodes[indexPressed];
                 Console.WriteLine(qNode.value);
                 AnswerNode answer = qNode.ChooseQuestion(graph);
+                OnQuestionSelect?.Invoke(this, (qNode, answer));
                 Console.WriteLine($" --> {answer.value}");
                 Console.WriteLine();
                 if (answer.endsConversation)
                 {
+                    if (answer.action != null) answer.action();
                     break;
                 }
-
             }
+            endConvo();
+    }
 
+    private void endConvo()
+    {
+        Console.WriteLine("Conversation Ended");
+        foreach(QuestionNode q in graph.nodes)
+        {
+            q.ResetChosenAnswer();
+        }
+        graph.edges = graph.startingEdges;
+        graph.adjList = graph.startingAdjList;
+        convoStarted = false;
     }
 
     private int WaitForValidKeyPress()

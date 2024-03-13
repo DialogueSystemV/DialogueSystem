@@ -7,8 +7,10 @@ namespace csharpdsa
     public class Graph
     {
         internal HashSet<Edge> edges;
+        internal HashSet<Edge> startingEdges;
         internal List<QuestionNode> nodes;
         internal bool[,] adjList;
+        internal bool[,] startingAdjList;
         public GraphConfig vars {get; set;}
 
         public Graph(List<QuestionNode> nodes, HashSet<Edge> edges, GraphConfig config)
@@ -44,12 +46,6 @@ namespace csharpdsa
             {
                 adjList[index, i] = false; 
             }
-        }
-        
-        public void RemoveEdge(Node from, Node to)
-        {
-            var list = edges.Where(e => e.from == from && e.to == to).ToList();
-            if(list.Count != 0) RemoveEdges(list);
         }
 
         public void RemoveEdges(HashSet<Edge> edges)

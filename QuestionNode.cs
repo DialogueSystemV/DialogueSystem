@@ -56,5 +56,10 @@ namespace csharpdsa
             if (removeQuestionAfterAsked) graph.RemoveQuestion(this);
             base.ProcessEdit(graph);
         }
-    }
+
+        internal void ResetChosenAnswer()
+        {
+            chosenAnswer = null;
+        }
+     }
 }
