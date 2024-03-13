@@ -17,12 +17,12 @@ namespace csharpdsa
         public bool removeQuestionAfterAsked { get; set; }
         
         
-        public QuestionNode(string value, bool endsConversation, bool remQAA, params AnswerNode[] possibleAnswers) : base(value, endsConversation)
+        public QuestionNode(string value, bool remQAA, params AnswerNode[] possibleAnswers) : base(value)
         {
             removeQuestionAfterAsked = remQAA;
             this.possibleAnswers = possibleAnswers.ToList();
         }
-        public QuestionNode(string value, bool endsConversation, params AnswerNode[] possibleAnswers) : base(value, endsConversation)
+        public QuestionNode(string value, params AnswerNode[] possibleAnswers) : base(value)
         {
             removeQuestionAfterAsked = false;
             this.possibleAnswers = possibleAnswers.ToList();

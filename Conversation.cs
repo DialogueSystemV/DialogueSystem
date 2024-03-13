@@ -36,10 +36,6 @@ public class Conversation
                 QuestionNode qNode = connectedNodes[indexPressed];
                 Console.WriteLine(qNode.value);
                 AnswerNode answer = qNode.ChooseQuestion(graph);
-                if (qNode.endsConversation)
-                {
-                    break;
-                }
                 Console.WriteLine($" --> {answer.value}");
                 Console.WriteLine();
                 if (answer.endsConversation)
