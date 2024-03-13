@@ -10,50 +10,72 @@ public class Conversation
     private QuestionNode currNode;
     private QuestionNode startNode;
     private bool convoStarted;
+    private bool autoStartWithCurrNode;
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
-    public Conversation(Graph graph, QuestionNode currNode)
+    public Conversation(Graph graph, QuestionNode currNode, bool autoStartWithCurrNode)
     {
         this.graph = graph;
         this.currNode = currNode;
         startNode = currNode;
         convoStarted = false;
+        this.autoStartWithCurrNode = autoStartWithCurrNode;
     }
-    
+
+    private void Start()
+    {
+        if (convoStarted) return;
+        if (!autoStartWithCurrNode)
+        {
+            convoStarted = true;
+            return;
+        }
+        graph.startingEdges = new HashSet<Edge>(graph.edges);
+        graph.CloneAdjList();
+        Console.WriteLine(currNode.value);
+        AnswerNode answer = currNode.ChooseQuestion(graph);
+        Console.WriteLine($" --> {answer.value}");
+        Console.WriteLine();
+        OnQuestionSelect?.Invoke(this, (currNode, answer));
+        convoStarted = true;
+        
+    }
     
     public void Run()
     {
-            while (true)
+        Start();
+        bool firstTime = true;
+        while (true)
+        {
+            var connectedNodes = graph.GetConnectedNodes(currNode);
+            if (!autoStartWithCurrNode && firstTime)
             {
-                var connectedNodes = graph.GetConnectedNodes(currNode);
-                if(!convoStarted || (convoStarted && !currNode.HasBeenAnswered())) connectedNodes.Add(currNode);
-                if (!convoStarted)
-                {
-                    convoStarted = true;
-                    graph.startingEdges = new HashSet<Edge>(graph.edges);
-                    graph.CloneAdjList();
-                }
-                if(connectedNodes.Count == 0)
-                {
-                    Console.WriteLine("No more questions to ask.");
-                    break;
-                }
-                connectedNodes.PrintNodes();
-                var indexPressed = WaitForValidKeyPress();
-                QuestionNode qNode = connectedNodes[indexPressed];
-                Console.WriteLine(qNode.value);
-                AnswerNode answer = qNode.ChooseQuestion(graph);
-                OnQuestionSelect?.Invoke(this, (qNode, answer));
-                Console.WriteLine($" --> {answer.value}");
-                Console.WriteLine();
-                if (answer.endsConversation)
-                {
-                    if (answer.action != null) answer.action();
-                    break;
-                }
+                connectedNodes.Add(currNode);
             }
-            endConvo();
+            AnswerNode answer = null;
+            if (connectedNodes.Count == 0)
+            {
+                Console.WriteLine("No more questions to ask.");
+                break;
+            }
+            connectedNodes.PrintNodes();
+            var indexPressed = WaitForValidKeyPress();
+            QuestionNode qNode = connectedNodes[indexPressed];
+            Console.WriteLine(qNode.value);
+            answer = qNode.ChooseQuestion(graph);
+            OnQuestionSelect?.Invoke(this, (qNode, answer));
+            Console.WriteLine($" --> {answer.value}");
+            Console.WriteLine();
+            if (answer.endsConversation)
+            {
+                if (answer.action != null) answer.action();
+                break;
+            }
+            firstTime = false;
+        }
+        endConvo();
     }
+
 
     private void endConvo()
     {
