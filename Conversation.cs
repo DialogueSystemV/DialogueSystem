@@ -63,8 +63,8 @@ public class Conversation
             q.ResetChosenAnswer();
         }
         convoStarted = false;
-        graph.edges = new HashSet<Edge>(graph.startingEdges);
-        graph.CloneStartingAdjList();
+        graph.edges = graph.startingEdges;
+        graph.adjList = graph.startingAdjList;
         currNode = startNode;
     }
     

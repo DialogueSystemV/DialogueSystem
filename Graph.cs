@@ -158,22 +158,5 @@ namespace csharpdsa
             }
             startingAdjList = newArray;
         }
-
-        internal void CloneStartingAdjList()
-        {
-            int rows = startingAdjList.GetLength(0);
-            int cols = startingAdjList.GetLength(1);
-
-            bool[,] newArray = new bool[rows, cols];
-
-            for (int i = 0; i < rows; i++)
-            {
-                for (int j = 0; j < cols; j++)
-                {
-                    newArray[i, j] = startingAdjList[i, j];
-                }
-            }
-            adjList = newArray;
-        }
     }
 }
