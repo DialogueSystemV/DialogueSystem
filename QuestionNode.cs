@@ -17,8 +17,14 @@ namespace csharpdsa
         public bool removeQuestionAfterAsked { get; set; }
         
         
+        public QuestionNode(string value, bool endsConversation, bool remQAA, params AnswerNode[] possibleAnswers) : base(value, endsConversation)
+        {
+            removeQuestionAfterAsked = remQAA;
+            this.possibleAnswers = possibleAnswers.ToList();
+        }
         public QuestionNode(string value, bool endsConversation, params AnswerNode[] possibleAnswers) : base(value, endsConversation)
         {
+            removeQuestionAfterAsked = false;
             this.possibleAnswers = possibleAnswers.ToList();
         }
 
@@ -47,14 +53,7 @@ namespace csharpdsa
 
         public override void ProcessEdit(Graph graph)
         {
-            if (removeQuestionAfterAsked)
-            {
-                int index = graph.nodes.IndexOf(this);
-                for (int i = 0; i < graph.adjList.GetLength(1); i++)
-                {
-                    graph.adjList[index, i] = false; 
-                }
-            }
+            if (removeQuestionAfterAsked) graph.RemoveQuestion(this);
             base.ProcessEdit(graph);
         }
     }

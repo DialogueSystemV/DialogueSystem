@@ -13,7 +13,7 @@ namespace csharpdsa
             AnswerNode an4 = new AnswerNode("Star Wars", 50);
             AnswerNode an5 = new AnswerNode("French Fries", 50);
             AnswerNode an6 = new AnswerNode("Idli", 50);
-            QuestionNode node1 = new QuestionNode("What is your name?",false, an1, an2);
+            QuestionNode node1 = new QuestionNode("What is your name?",false, true, an1, an2);
             QuestionNode node2 = new QuestionNode("What is your fav movie?", false, an3, an4);
             QuestionNode node3 = new QuestionNode("What is your fav food?", false, an5, an6);
             
@@ -21,9 +21,6 @@ namespace csharpdsa
             Edge edge2 = new Edge(node2, node3);
             Edge edge3 = new Edge(node1, node3);
             Edge edge4 = new Edge(node2, node1);
-            node1.removeQuestionAfterAsked = false;
-            node2.removeQuestionAfterAsked = true;
-            node3.removeQuestionAfterAsked = true;
             
             
             var l = new List<QuestionNode>()

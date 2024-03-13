@@ -1,46 +1,36 @@
 using System;
 using System.Collections.Generic;
-using csharpdsa;
 
-public static class ListExtensions
+namespace csharpdsa
 {
-    public static List<T> RemoveWhere<T>(this List<T> list, Predicate<T> condition)
+    public static class ListExtensions
     {
-        List<T> filteredList = new List<T>();
-
-        foreach (var item in list)
+        public static void PrintNodes<T>(this List<T> list) where T : Node
         {
-            if (!condition(item))
+            for (var index = 0; index < list.Count; index++)
             {
-                filteredList.Add(item);
+                var node = list[index];
+                String s = (index == list.Count - 1) ? "" : "\n";
+                Console.Write($"{index + 1}: {node.value}{s}");
             }
         }
-        return filteredList;
     }
-    public static void PrintNodes<T>(this List<T> list) where T : Node
+
+    public class NoValidAnswerException : Exception
     {
-        for (var index = 0; index < list.Count; index++)
+        public NoValidAnswerException()
         {
-            var node = list[index];
-            String s = (index == list.Count - 1) ? "" : "\n";
-            Console.Write($"{index + 1}: {node.value}{s}");
+
         }
-    }
-}
 
-public class NoValidAnswerException : Exception
-{
-    public NoValidAnswerException()
-    {
-        
-    }
-    public NoValidAnswerException(string message)
-        : base(message)
-    {
-    }
+        public NoValidAnswerException(string message)
+            : base(message)
+        {
+        }
 
-    public NoValidAnswerException(string message, Exception inner)
-        : base(message, inner)
-    {
+        public NoValidAnswerException(string message, Exception inner)
+            : base(message, inner)
+        {
+        }
     }
 }

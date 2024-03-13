@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using static csharpdsa.ListExtensions;
 namespace csharpdsa
 {
     public class Graph
@@ -37,7 +37,30 @@ namespace csharpdsa
             edges.Remove(edge);
         }
 
+        public void RemoveQuestion(QuestionNode n)
+        {
+            int index = nodes.IndexOf(n);
+            for (int i = 0; i < adjList.GetLength(1); i++)
+            {
+                adjList[index, i] = false; 
+            }
+        }
+        
+        public void RemoveEdge(Node from, Node to)
+        {
+            var list = edges.Where(e => e.from == from && e.to == to).ToList();
+            if(list.Count != 0) RemoveEdges(list);
+        }
+
         public void RemoveEdges(HashSet<Edge> edges)
+        {
+            foreach (Edge e in edges) 
+            {
+                RemoveEdge(e);
+            }
+        }
+        
+        public void RemoveEdges(List<Edge> edges)
         {
             foreach (Edge e in edges) 
             {
@@ -46,6 +69,14 @@ namespace csharpdsa
         }
 
         public void AddEdges(HashSet<Edge> edges)
+        {
+            foreach (Edge e in edges)
+            {
+                AddEdge(e);
+            }
+        }
+        
+        public void AddEdges(List<Edge> edges)
         {
             foreach (Edge e in edges)
             {
