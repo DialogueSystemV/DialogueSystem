@@ -30,7 +30,7 @@ public class Conversation
         connectedNodes = new List<QuestionNode>();
     }
 
-    private void Start()
+    public void Init()
     {
         if (convoStarted) return;
         graph.startingEdges = new HashSet<Edge>(graph.edges);
