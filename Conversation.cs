@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using Rage;
+using RAGENativeUI;
+using RAGENativeUI.Elements;
 
 namespace csharpdsa;
 
@@ -10,55 +13,76 @@ public class Conversation
     private QuestionNode currNode;
     private QuestionNode startNode;
     private bool convoStarted;
+    private GameFiber ConversationThread;
+    public UIMenu convoMenu;
+    private bool initalized;
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
-    public Conversation(Graph graph, QuestionNode currNode)
+    public Conversation(Graph graph, UIMenu convoMenu, QuestionNode currNode)
     {
         this.graph = graph;
         this.currNode = currNode;
         startNode = currNode;
         convoStarted = false;
+        this.convoMenu = convoMenu;
+        initalized = false;
     }
 
     private void Start()
     {
-        if (convoStarted) return;
         graph.startingEdges = new HashSet<Edge>(graph.edges);
         graph.CloneAdjList();
-        
+        convoMenu.Clear();
+        foreach (QuestionNode q in graph.nodes)
+        {
+            var item = new UIMenuItem(q.value);
+            convoMenu.AddItem(item);
+        }
+        initalized = true;
+    }
+    
+    public void Initialize()
+    {
+        if (initalized || convoStarted) return;
+        Start();
     }
     
     public void Run()
     {
-        Start();
-        bool firstTime = true;
-        while (true)
+        ConversationThread = GameFiber.StartNew(delegate
         {
-            var connectedNodes = graph.GetConnectedNodes(currNode);
-            AnswerNode answer = null;
-            if(firstTime) connectedNodes.Add(currNode);
-            if (connectedNodes.Count == 0 && !firstTime)
+            if(!initalized && !convoStarted) Start();
+            bool firstTime = true;
+            while (true)
             {
-                Console.WriteLine("No more questions to ask.");
-                break;
+                GameFiber.Yield();
+                var connectedNodes = graph.GetConnectedNodes(currNode);
+                AnswerNode answer = null;
+                if (firstTime) connectedNodes.Add(currNode);
+                if (connectedNodes.Count == 0 && !firstTime)
+                {
+                    Game.DisplayHelp("No more questions to ask.");
+                    break;
+                }
+
+                //connectedNodes.PrintNodes();
+                var indexPressed = WaitForValidKeyPress();
+                QuestionNode qNode = connectedNodes[indexPressed];
+                Game.DisplaySubtitle(qNode.value);
+                answer = qNode.ChooseQuestion(graph);
+                OnQuestionSelect?.Invoke(this, (qNode, answer));
+                Game.DisplaySubtitle(answer.value);
+                if (answer.endsConversation)
+                {
+                    if (answer.action != null) answer.action();
+                    break;
+                }
+                firstTime = false;
+                convoStarted = true;
             }
-            connectedNodes.PrintNodes();
-            var indexPressed = WaitForValidKeyPress();
-            QuestionNode qNode = connectedNodes[indexPressed];
-            Console.WriteLine(qNode.value);
-            answer = qNode.ChooseQuestion(graph);
-            OnQuestionSelect?.Invoke(this, (qNode, answer));
-            Console.WriteLine($" --> {answer.value}");
-            Console.WriteLine();
-            if (answer.endsConversation)
-            {
-                if (answer.action != null) answer.action();
-                break;
-            }
-            firstTime = false;
-            convoStarted = true;
-        }
-        endConvo();
+
+            endConvo();
+        });
     }
 
 
