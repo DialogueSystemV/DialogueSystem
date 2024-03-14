@@ -41,7 +41,8 @@ public class Conversation
     private void UpdateMenu(bool start = false)
     {
         convoMenu.Clear();
-        foreach (var item in start ? startNodes.ToList() : graph.GetConnectedNodes(currNode))
+        connectedNodes = graph.GetConnectedNodes(currNode);
+        foreach (var item in start ? startNodes.ToList() : connectedNodes)
         {
             convoMenu.AddItem(new UIMenuItem(item.value));
         }
