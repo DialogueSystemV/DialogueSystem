@@ -32,12 +32,14 @@ public class Conversation
     {
         graph.startingEdges = new HashSet<Edge>(graph.edges);
         graph.CloneAdjList();
+        var connectedNodes = graph.GetConnectedNodes(currNode);
         convoMenu.Clear();
-        foreach (QuestionNode q in graph.nodes)
+        foreach (QuestionNode q in connectedNodes)
         {
             var item = new UIMenuItem(q.value);
             convoMenu.AddItem(item);
         }
+        convoMenu.AddItem(new UIMenuItem(currNode.value));
         initalized = true;
     }
     
@@ -46,20 +48,29 @@ public class Conversation
         if (initalized || convoStarted) return;
         Start();
     }
+
+    private void UpdateMenu()
+    {
+        var connectedNodes = graph.GetConnectedNodes(currNode);
+        convoMenu.Clear();
+        foreach (QuestionNode q in connectedNodes)
+        {
+            var item = new UIMenuItem(q.value);
+            convoMenu.AddItem(item);
+        }
+    }
     
     public void Run()
     {
         ConversationThread = GameFiber.StartNew(delegate
         {
             if(!initalized && !convoStarted) Start();
-            bool firstTime = true;
             while (true)
             {
                 GameFiber.Yield();
                 var connectedNodes = graph.GetConnectedNodes(currNode);
                 AnswerNode answer = null;
-                if (firstTime) connectedNodes.Add(currNode);
-                if (connectedNodes.Count == 0 && !firstTime)
+                if (connectedNodes.Count == 0)
                 {
                     Game.DisplayHelp("No more questions to ask.");
                     break;
@@ -70,6 +81,7 @@ public class Conversation
                 QuestionNode qNode = connectedNodes[indexPressed];
                 Game.DisplaySubtitle(qNode.value);
                 answer = qNode.ChooseQuestion(graph);
+                currNode = qNode;
                 OnQuestionSelect?.Invoke(this, (qNode, answer));
                 Game.DisplaySubtitle(answer.value);
                 if (answer.endsConversation)
@@ -77,7 +89,6 @@ public class Conversation
                     if (answer.action != null) answer.action();
                     break;
                 }
-                firstTime = false;
                 convoStarted = true;
             }
 
@@ -94,6 +105,7 @@ public class Conversation
             q.ResetChosenAnswer();
         }
         convoStarted = false;
+        initalized = false;
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         currNode = startNode;
