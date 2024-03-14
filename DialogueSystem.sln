@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "csharpdsa", "csharpdsa.csproj", "{5B89938D-F00F-4194-9AAE-8EC6DF307EAB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DialogueSystem", "DialogueSystem.csproj", "{5B89938D-F00F-4194-9AAE-8EC6DF307EAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

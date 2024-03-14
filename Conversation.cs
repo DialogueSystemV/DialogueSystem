@@ -5,7 +5,7 @@ using Rage;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 
-namespace csharpdsa;
+namespace DialogueSystem;
 
 public class Conversation
 {

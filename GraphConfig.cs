@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace csharpdsa;
+namespace DialogueSystem;
 
 public class GraphConfig
 {

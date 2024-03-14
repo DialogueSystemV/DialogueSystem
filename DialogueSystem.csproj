@@ -8,8 +8,8 @@
         <ProjectGuid>{5B89938D-F00F-4194-9AAE-8EC6DF307EAB}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>csharpdsa</RootNamespace>
-        <AssemblyName>csharpdsa</AssemblyName>
+        <RootNamespace>DialogueSystem</RootNamespace>
+        <AssemblyName>DialogueSystem</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

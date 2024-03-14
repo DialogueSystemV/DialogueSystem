@@ -1,6 +1,6 @@
 using System;
 
-namespace csharpdsa
+namespace DialogueSystem
 {
     public struct Edge
     {

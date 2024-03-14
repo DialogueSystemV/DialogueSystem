@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static csharpdsa.ListExtensions;
-namespace csharpdsa
+using static DialogueSystem.ListExtensions;
+namespace DialogueSystem
 {
     public class Graph
     {
