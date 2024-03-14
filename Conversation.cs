@@ -10,7 +10,6 @@ public class Conversation
     private QuestionNode currNode;
     private QuestionNode startNode;
     private bool convoStarted;
-    private bool autoStartWithCurrNode;
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     
     public Conversation(Graph graph, QuestionNode currNode)
