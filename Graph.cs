@@ -38,6 +38,11 @@ namespace csharpdsa
             adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = false;
             edges.Remove(edge);
         }
+        
+        public void AddQuestion(QuestionNode parentNode, QuestionNode childNode)
+        {
+            AddEdge(new Edge(parentNode, childNode));
+        }
 
         public void RemoveQuestion(QuestionNode n)
         {
@@ -47,6 +52,7 @@ namespace csharpdsa
                 adjList[index, i] = false; 
             }
         }
+        
 
         public void RemoveEdges(HashSet<Edge> edges)
         {
