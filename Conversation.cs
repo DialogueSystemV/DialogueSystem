@@ -56,25 +56,29 @@ public class Conversation
 
     private void OnItemSelect(UIMenu uiMenu, UIMenuItem selectedItem, int index)
     {
-        AnswerNode answer = null;
-        QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
-        currNode = qNode;
-        //Console.WriteLine(qNode.value);
-        Game.DisplaySubtitle(qNode.value);
-        answer = qNode.ChooseQuestion(graph);
-        OnQuestionSelect?.Invoke(this, (qNode, answer));
-        Game.DisplaySubtitle(answer.value);
-        //Console.WriteLine($" --> {answer.value}");
-        //Console.WriteLine();
-        if (answer.action != null) answer.action();
-        if (answer.endsConversation)
+        convoThread = new GameFiber(delegate
         {
-            EndConvo();
-            return;
-        }
-        UpdateMenu();
-        convoStarted = true;
-        firstTime = false;
+            AnswerNode answer = null;
+            QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
+            currNode = qNode;
+            //Console.WriteLine(qNode.value);
+            Game.DisplaySubtitle(qNode.value);
+            answer = qNode.ChooseQuestion(graph);
+            OnQuestionSelect?.Invoke(this, (qNode, answer));
+            Game.DisplaySubtitle(answer.value);
+            //Console.WriteLine($" --> {answer.value}");
+            //Console.WriteLine();
+            if (answer.action != null) answer.action();
+            if (answer.endsConversation)
+            {
+                EndConvo();
+                return;
+            }
+
+            UpdateMenu();
+            convoStarted = true;
+            firstTime = false;
+        });
     }
 
     private void EndConvo()
