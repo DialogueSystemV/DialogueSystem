@@ -38,7 +38,7 @@ public class Conversation
             var connectedNodes = graph.GetConnectedNodes(currNode);
             AnswerNode answer = null;
             if(firstTime) connectedNodes.Add(currNode);
-            if (connectedNodes.Count == 0)
+            if (connectedNodes.Count == 0 && !firstTime)
             {
                 Console.WriteLine("No more questions to ask.");
                 break;
