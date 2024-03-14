@@ -15,10 +15,10 @@ public class Conversation
     private QuestionNode[] startNodes;
     private bool convoStarted;
     public UIMenu convoMenu;
-    internal GameFiber convoThread;
     private List<QuestionNode> connectedNodes;
     private bool firstTime;
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
+    public event EventHandler OnCoversationEnded;
     
     public Conversation(Graph graph, UIMenu convoMenu, params QuestionNode[] startNodes)
     {
@@ -28,6 +28,7 @@ public class Conversation
         convoStarted = false;
         this.convoMenu = convoMenu;
         connectedNodes = new List<QuestionNode>();
+        firstTime = true;
     }
 
     public void Init()
@@ -51,34 +52,36 @@ public class Conversation
     public void Run()
     {
         convoMenu.OnItemSelect += OnItemSelect;
-        convoMenu.Visible = true;
+        Game.DisplaySubtitle("Subbing to event");
     }
 
     private void OnItemSelect(UIMenu uiMenu, UIMenuItem selectedItem, int index)
     {
-        convoThread = new GameFiber(delegate
+        Game.LogTrivial("In Dialogue System item select");
+        AnswerNode answer = null;
+        QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
+        currNode = qNode;
+        //Console.WriteLine(qNode.value);
+        Game.DisplaySubtitle(qNode.value);
+        answer = qNode.ChooseQuestion(graph);
+        OnQuestionSelect?.Invoke(this, (qNode, answer));
+        Game.DisplaySubtitle(answer.value);
+        //Console.WriteLine($" --> {answer.value}");
+        //Console.WriteLine();
+        if (answer.action != null) answer.action();
+        if (answer.endsConversation)
         {
-            AnswerNode answer = null;
-            QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
-            currNode = qNode;
-            //Console.WriteLine(qNode.value);
-            Game.DisplaySubtitle(qNode.value);
-            answer = qNode.ChooseQuestion(graph);
-            OnQuestionSelect?.Invoke(this, (qNode, answer));
-            Game.DisplaySubtitle(answer.value);
-            //Console.WriteLine($" --> {answer.value}");
-            //Console.WriteLine();
-            if (answer.action != null) answer.action();
-            if (answer.endsConversation)
-            {
-                EndConvo();
-                return;
-            }
+            EndConvo();
+            return;
+        }
 
-            UpdateMenu();
-            convoStarted = true;
-            firstTime = false;
-        });
+        UpdateMenu();
+        if (connectedNodes.Count == 0)
+        {
+            EndConvo();
+        }
+        convoStarted = true;
+        firstTime = false;
     }
 
     private void EndConvo()
@@ -96,6 +99,7 @@ public class Conversation
         convoStarted = false;
         firstTime = true;
         currNode = null;
+        OnCoversationEnded?.Invoke(this, EventArgs.Empty);
     }
     
     // private int WaitForValidKeyPress()
