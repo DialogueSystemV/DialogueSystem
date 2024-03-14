@@ -66,9 +66,9 @@ public class Conversation
         Game.DisplaySubtitle(answer.value);
         //Console.WriteLine($" --> {answer.value}");
         //Console.WriteLine();
+        if (answer.action != null) answer.action();
         if (answer.endsConversation)
         {
-            if (answer.action != null) answer.action();
             endConvo();
             return;
         }
@@ -86,10 +86,10 @@ public class Conversation
         {
             q.ResetChosenAnswer();
         }
-        convoStarted = false;
-        firstTime = true;
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
+        convoStarted = false;
+        firstTime = true;
         currNode = null;
     }
     
