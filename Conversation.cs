@@ -61,13 +61,10 @@ public class Conversation
         AnswerNode answer = null;
         QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
         currNode = qNode;
-        //Console.WriteLine(qNode.value);
         Game.DisplaySubtitle(qNode.value);
         answer = qNode.ChooseQuestion(graph);
         OnQuestionSelect?.Invoke(this, (qNode, answer));
         Game.DisplaySubtitle(answer.value);
-        //Console.WriteLine($" --> {answer.value}");
-        //Console.WriteLine();
         if (answer.action != null) answer.action();
         if (answer.endsConversation)
         {
@@ -86,7 +83,6 @@ public class Conversation
 
     private void EndConvo()
     {
-        // Console.WriteLine("Conversation Ended!");
         convoMenu.Close();
         Game.DisplaySubtitle("Conversation Ended");
         foreach(QuestionNode q in graph.nodes)
@@ -101,13 +97,5 @@ public class Conversation
         currNode = null;
         OnCoversationEnded?.Invoke(this, EventArgs.Empty);
     }
-    
-    // private int WaitForValidKeyPress()
-    // {
-    //     Console.Write($"\nInput the number of the question you want to ask: ");
-    //     string input = Console.ReadLine();
-    //     return int.Parse(input) - 1;
-    // }
-    
     
 }
