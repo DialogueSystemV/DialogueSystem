@@ -69,7 +69,7 @@ public class Conversation
         if (answer.action != null) answer.action();
         if (answer.endsConversation)
         {
-            endConvo();
+            EndConvo();
             return;
         }
         UpdateMenu();
@@ -77,7 +77,7 @@ public class Conversation
         firstTime = false;
     }
 
-    private void endConvo()
+    private void EndConvo()
     {
         // Console.WriteLine("Conversation Ended!");
         convoMenu.Close();
@@ -88,6 +88,7 @@ public class Conversation
         }
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
+        convoMenu.OnItemSelect -= OnItemSelect;
         convoStarted = false;
         firstTime = true;
         currNode = null;
