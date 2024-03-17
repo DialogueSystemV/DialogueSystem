@@ -39,12 +39,17 @@ namespace DialogueSystem
             edges.Remove(edge);
         }
         
-        public void AddQuestion(QuestionNode parentNode, QuestionNode childNode)
+        public void LinkQuestions(QuestionNode fromNode, QuestionNode toNode)
         {
-            AddEdge(new Edge(parentNode, childNode));
+            AddEdge(new Edge(fromNode, toNode));
+        }
+        
+        public void RemoveLink(QuestionNode fromNode, QuestionNode toNode)
+        {
+            RemoveEdge(new Edge(fromNode, toNode));
         }
 
-        public void RemoveQuestion(QuestionNode n)
+        public void RemoveAllLinksFromQuestion(QuestionNode n)
         {
             int index = nodes.IndexOf(n);
             for (int i = 0; i < adjList.GetLength(1); i++)

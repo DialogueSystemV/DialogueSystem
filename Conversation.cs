@@ -13,7 +13,7 @@ public class Conversation
     public Graph graph { get; private set; }
     private QuestionNode currNode;
     private QuestionNode[] startNodes;
-    private bool convoStarted;
+    public bool convoStarted { get; private set; }
     public UIMenu convoMenu;
     private List<QuestionNode> connectedNodes;
     private bool firstTime;

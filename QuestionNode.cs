@@ -53,7 +53,7 @@ namespace DialogueSystem
 
         public override void ProcessEdit(Graph graph)
         {
-            if (removeQuestionAfterAsked) graph.RemoveQuestion(this);
+            if (removeQuestionAfterAsked) graph.RemoveAllLinksFromQuestion(this);
             base.ProcessEdit(graph);
         }
 
