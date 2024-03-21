@@ -2,34 +2,61 @@ namespace DialogueSystem
 {
     public class QuestionNode : Node
     { 
-        
+        /// <summary>
+        /// List of possible answers to the question
+        /// </summary>
         public List<AnswerNode> possibleAnswers { get; set; }
 
         private AnswerNode chosenAnswer = null;
 
         internal Random rndm = new Random(DateTime.Now.Millisecond);
         
+        /// <summary>
+        /// Whether the question should be removed from the pool after being asked
+        /// </summary>
         public bool removeQuestionAfterAsked { get; set; }
         
-        
-        public QuestionNode(string value, bool remQAA, params AnswerNode[] possibleAnswers) : base(value)
+        /// <summary>
+        /// Instantiates a new node with the given question and possible answers
+        /// </summary>
+        /// <param name="value">Question wanting to be asked</param>
+        /// <param name="removeQuestionAfterAsked">Whether the question should be removed from the pool after being asked</param>
+        /// <param name="possibleAnswers">array of all answers as AnswerNode object</param>
+        public QuestionNode(string value, bool removeQuestionAfterAsked, params AnswerNode[] possibleAnswers) : base(value)
         {
-            removeQuestionAfterAsked = remQAA;
+            this.removeQuestionAfterAsked = removeQuestionAfterAsked;
             this.possibleAnswers = possibleAnswers.ToList();
         }
+        
+        /// <summary>
+        /// Instantiates a new node with the given question and possible answers
+        /// removeQuestionAfteAsked is false by default
+        /// </summary>
+        /// <param name="value">Question wanting to be asked</param>
+        /// <param name="possibleAnswers">array of all answers as AnswerNode object</param>
         public QuestionNode(string value, params AnswerNode[] possibleAnswers) : base(value)
         {
             removeQuestionAfterAsked = false;
             this.possibleAnswers = possibleAnswers.ToList();
         }
-
+        
+        /// <summary>
+        /// Chooses the answer to the question based on the probability of the answer
+        /// and conditions provided
+        /// </summary>
+        /// <param name="graph">Graph which the question is associated with</param>
+        /// <returns>The AnswerNode chosen</returns>
         public AnswerNode ChooseQuestion(Graph graph)
         {
-            ProcessEdit(graph);
             AnswerNode node = ChooseAnswer();
-            node.ProcessEdit(graph);
+            if (chosenAnswer == null)
+            {
+                ProcessEdit(graph);
+                node.ProcessEdit(graph);
+            }
             return node;
         }
+        
         
         private AnswerNode ChooseAnswer()
         {
@@ -46,12 +73,20 @@ namespace DialogueSystem
             return chosenAnswer;
         }
 
+        /// <summary>
+        /// Processes all links to be added and removed from the question
+        /// </summary>
+        /// <param name="graph">Graph which the question is associated with</param>
         public override void ProcessEdit(Graph graph)
         {
             if (removeQuestionAfterAsked) graph.RemoveAllLinksFromQuestion(this);
             base.ProcessEdit(graph);
         }
 
+        /// <summary>
+        /// Returns whether the question has been answered
+        /// </summary>
+        /// <returns>boolean</returns>
         public bool HasBeenAnswered() => chosenAnswer != null;
 
         internal void ResetChosenAnswer()
