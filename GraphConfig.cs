@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DialogueSystem;
+﻿namespace DialogueSystem;
 
 public class GraphConfig
 {

@@ -1,5 +1,3 @@
-using System;
-
 namespace DialogueSystem
 {
     public struct Edge
