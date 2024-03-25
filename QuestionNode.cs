@@ -22,21 +22,9 @@ namespace DialogueSystem
         /// <param name="value">Question wanting to be asked</param>
         /// <param name="removeQuestionAfterAsked">Whether the question should be removed from the pool after being asked</param>
         /// <param name="possibleAnswers">array of all answers as AnswerNode object</param>
-        public QuestionNode(string value, bool removeQuestionAfterAsked, params AnswerNode[] possibleAnswers) : base(value)
+        public QuestionNode(string value, bool removeQuestionAfterAsked = false, params AnswerNode[] possibleAnswers) : base(value)
         {
             this.removeQuestionAfterAsked = removeQuestionAfterAsked;
-            this.possibleAnswers = possibleAnswers.ToList();
-        }
-        
-        /// <summary>
-        /// Instantiates a new node with the given question and possible answers
-        /// removeQuestionAfteAsked is false by default
-        /// </summary>
-        /// <param name="value">Question wanting to be asked</param>
-        /// <param name="possibleAnswers">array of all answers as AnswerNode object</param>
-        public QuestionNode(string value, params AnswerNode[] possibleAnswers) : base(value)
-        {
-            removeQuestionAfterAsked = false;
             this.possibleAnswers = possibleAnswers.ToList();
         }
         
@@ -62,13 +50,13 @@ namespace DialogueSystem
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers = possibleAnswers.FindAll(PA => PA.Condition == null || PA.Condition(null));
+            EnabledAnswers = possibleAnswers.FindAll(PA => PA.condition == null || PA.condition(null));
             if (EnabledAnswers.Count == 0)
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
             }
-            double maxProbability = EnabledAnswers.Max(node => node.Probability);
-            List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.Probability == maxProbability).ToList();
+            double maxProbability = EnabledAnswers.Max(node => node.probability);
+            List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.probability == maxProbability).ToList();
             chosenAnswer = nodesWithHighestProbability[rndm.Next(nodesWithHighestProbability.Count)];
             return chosenAnswer;
         }
