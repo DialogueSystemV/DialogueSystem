@@ -1,40 +1,29 @@
-using System;
-using Rage;
-
-namespace DialogueSystem;
-
-public class Node
+namespace DialogueSystem
 {
-    public string Value { get; set; }
-    public bool EndsConversation { get; set; }
-    public Action<Ped>? PerformActionIfChosen{ get; set; }
+    public abstract class Node
+    {
+        private Guid ID;
+        public string value { get; set; }
+        public HashSet<Edge> edgesToRemove { get; set; }
+        public HashSet<Edge> edgesToAdd { get; set; }
 
-    public Node(string Value)
-    {
-        this.Value = Value;
-        EndsConversation = false;
-        PerformActionIfChosen = null;
-    }
-    
-    public Node(string Value, bool EndsConversation)
-    {
-        this.Value = Value;
-        this.EndsConversation = EndsConversation;
-        PerformActionIfChosen = null;
-    }
-    
-    public Node(string Value, Action<Ped> PerformActionIfChosen)
-    {
-        this.Value = Value;
-        EndsConversation = false;
-        this.PerformActionIfChosen = PerformActionIfChosen;
-    }
-    
-    public Node(string Value,Action<Ped> PerformActionIfChosen,bool EndsConversation)
-    {
-        this.Value = Value;
-        this.EndsConversation = EndsConversation;
-        this.PerformActionIfChosen = PerformActionIfChosen;
-    }
+        public Node(string Value)
+        {
+            this.value = Value;
+            ID = new Guid();
+            edgesToAdd = new HashSet<Edge>();
+            edgesToRemove = new HashSet<Edge>();
+        }
 
+        static bool Equals(Node n1, Node n2)
+        {
+            return n1.ID.Equals(n2.ID);
+        }
+
+        public virtual void ProcessEdit(Graph graph)
+        {
+            graph.RemoveEdges(edgesToRemove);
+            graph.AddEdges(edgesToAdd);
+        }
+    }
 }

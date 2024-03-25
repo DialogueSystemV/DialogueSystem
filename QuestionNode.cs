@@ -1,120 +1,85 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Rage;
-
-namespace DialogueSystem;
-
-public class QuestionNode : Node
+namespace DialogueSystem
 {
-    public QuestionEffect Effect { get; set; }
-    public List<AnswerNode> PossibleAnswers { get; set; }
+    public class QuestionNode : Node
+    { 
+        /// <summary>
+        /// List of possible answers to the question
+        /// </summary>
+        public List<AnswerNode> possibleAnswers { get; set; }
 
-    internal AnswerNode chosenAnswer = null;
-    internal bool QuestionAskedAlready = false;
-    public bool RemoveAfterAsked { get; set; }
-    
-    internal Random rndm = new(DateTime.Now.Millisecond);
-    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool removeAfterAsked) : base(Value)
-    {
-        this.Effect = Effect;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    
-    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, bool removeAfterAsked) : base(Value)
-    {
-        Effect = QuestionEffect.Neutral;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    
-    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, QuestionEffect Effect, bool EndsConversation, bool removeAfterAsked) : base(Value, EndsConversation)
-    {
-        this.Effect = Effect;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    public QuestionNode(string Value, List<AnswerNode> possibleAnswers, bool EndsConversation, bool removeAfterAsked) : base(Value, EndsConversation)
-    {
-        Effect = QuestionEffect.Neutral;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool removeAfterAsked) : base(Value, PerformActionIfChosen)
-    {
-        this.Effect = Effect;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, bool removeAfterAsked) : base(Value, PerformActionIfChosen)
-    {
-        Effect = QuestionEffect.Neutral;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, QuestionEffect Effect, bool EndsConversation, bool removeAfterAsked) : base(Value, PerformActionIfChosen, EndsConversation)
-    {
-        this.Effect = Effect;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    
-    public QuestionNode(string Value,List<AnswerNode> possibleAnswers, Action<Ped> PerformActionIfChosen, bool EndsConversation, bool removeAfterAsked) : base(Value, PerformActionIfChosen, EndsConversation)
-    {
-        Effect = QuestionEffect.Neutral;
-        PossibleAnswers = possibleAnswers;
-        RemoveAfterAsked = removeAfterAsked;
-    }
-    
-    internal AnswerNode ChooseAnswer(Conversation convo)
-    {
-        if (chosenAnswer != null) return chosenAnswer;
-        List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-        EnabledAnswers = PossibleAnswers.FindAll(PA => PA.Condition == null || PA.Condition(convo.Ped));
-        if (EnabledAnswers.Count == 0)
+        private AnswerNode chosenAnswer = null;
+
+        private Random rndm = new Random(DateTime.Now.Millisecond);
+        
+        /// <summary>
+        /// Whether the question should be removed from the pool after being asked
+        /// </summary>
+        public bool removeQuestionAfterAsked { get; set; }
+        
+        /// <summary>
+        /// Instantiates a new node with the given question and possible answers
+        /// </summary>
+        /// <param name="value">Question wanting to be asked</param>
+        /// <param name="removeQuestionAfterAsked">Whether the question should be removed from the pool after being asked</param>
+        /// <param name="possibleAnswers">array of all answers as AnswerNode object</param>
+        public QuestionNode(string value, bool removeQuestionAfterAsked = false, params AnswerNode[] possibleAnswers) : base(value)
         {
-            throw new NoValidAnswerException($"No Valid Answer for Question Node: {Value}");
+            this.removeQuestionAfterAsked = removeQuestionAfterAsked;
+            this.possibleAnswers = possibleAnswers.ToList();
         }
-        double maxProbability = EnabledAnswers.Max(node => node.Probability);
-        List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.Probability == maxProbability).ToList();
-        chosenAnswer = nodesWithHighestProbability[rndm.Next(nodesWithHighestProbability.Count)];
-        return chosenAnswer;
-    }
-
-
-    public void InsertVariablesIntoString(string[] replacements)
-    {
-        for (int i = 0; i < PossibleAnswers.Count;i++)
+        
+        /// <summary>
+        /// Chooses the answer to the question based on the probability of the answer
+        /// and conditions provided
+        /// </summary>
+        /// <param name="graph">Graph which the question is associated with</param>
+        /// <returns>The AnswerNode chosen</returns>
+        public AnswerNode ChooseQuestion(Graph graph)
         {
-            AnswerNode node = PossibleAnswers[i];
-            for (int j = 0; j < replacements.Length; j++)
+            AnswerNode node = ChooseAnswer();
+            if (chosenAnswer == null)
             {
-                if (i == 0)
-                {
-                    Value = Value.Replace(j.ToString(), replacements[j]); //replacing the question node if it is the first iteration of the outer loop
-                }
-                node.Value = node.Value.Replace(j.ToString(), replacements[j]); //replace the ansewr node no matter what iteration of the outer loop we are on
-            }     
+                ProcessEdit(graph);
+                node.ProcessEdit(graph);
+            }
+            return node;
         }
-    }
-    
-    public void InsertVariablesIntoString(string[] wordsToReplace,string[] replacements)
-    {
-        for (int i =0; i < PossibleAnswers.Count;i++)
+        
+        
+        private AnswerNode ChooseAnswer()
         {
-            AnswerNode node = PossibleAnswers[i];
-            for (int j = 0; j < replacements.Length; j++)
+            if (chosenAnswer != null) return chosenAnswer;
+            List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
+            EnabledAnswers = possibleAnswers.FindAll(PA => PA.condition == null || PA.condition(null));
+            if (EnabledAnswers.Count == 0)
             {
-                if (i == 0)
-                {
-                    Value = Value.Replace(wordsToReplace[j], replacements[j]); //same as above. we are just using the array "wordsToReplace if the dev does not like using numbers 0 to arrayLength
-                }
-                node.Value = node.Value.Replace(wordsToReplace[j], replacements[j]);
-            }     
+                throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
+            }
+            double maxProbability = EnabledAnswers.Max(node => node.probability);
+            List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.probability == maxProbability).ToList();
+            chosenAnswer = nodesWithHighestProbability[rndm.Next(nodesWithHighestProbability.Count)];
+            return chosenAnswer;
         }
-    }
 
+        /// <summary>
+        /// Processes all links to be added and removed from the question
+        /// </summary>
+        /// <param name="graph">Graph which the question is associated with</param>
+        public override void ProcessEdit(Graph graph)
+        {
+            if (removeQuestionAfterAsked) graph.RemoveAllLinksFromQuestion(this);
+            base.ProcessEdit(graph);
+        }
+
+        /// <summary>
+        /// Returns whether the question has been answered
+        /// </summary>
+        /// <returns>boolean</returns>
+        public bool HasBeenAnswered() => chosenAnswer != null;
+
+        internal void ResetChosenAnswer()
+        {
+            chosenAnswer = null;
+        }
+     }
 }

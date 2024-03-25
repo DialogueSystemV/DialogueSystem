@@ -1,6 +1,3 @@
-/packages.config
-/packages/
-/obj/
-/bin/
 /.idea/
-/DialogueSystem.sln.DotSettings.user
+/bin/
+/obj/
