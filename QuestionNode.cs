@@ -9,7 +9,7 @@ namespace DialogueSystem
 
         private AnswerNode chosenAnswer = null;
 
-        internal Random rndm = new Random(DateTime.Now.Millisecond);
+        private Random rndm = new Random(DateTime.Now.Millisecond);
         
         /// <summary>
         /// Whether the question should be removed from the pool after being asked
