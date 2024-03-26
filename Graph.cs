@@ -24,21 +24,41 @@ namespace DialogueSystem
             adjList = new bool[this.nodes.Count, this.nodes.Count];
             AddEdges(edges);
         }
+        
+        /// <summary>
+        /// Adds a(n) link(edge) between the specified nodes
+        /// </summary>
+        /// <param name="fromNode">The source node</param>
+        /// <param name="toNode">The destination node</param>
         public void LinkQuestions(QuestionNode fromNode, QuestionNode toNode)
         {
             AddEdge(new Edge(fromNode, toNode));
         }
         
+        /// <summary>
+        /// Removes a(n) link(edge) between the specified nodes
+        /// </summary>
+        /// <param name="fromNode">The source node</param>
+        /// <param name="toNode">The destination node</param>
         public void RemoveLink(QuestionNode fromNode, QuestionNode toNode)
         {
             RemoveEdge(new Edge(fromNode, toNode));
         }
 
+        /// <summary>
+        /// Gets all connected questions from the specified node
+        /// </summary>
+        /// <param name="n">The node to get connected nodes from</param>
+        /// <returns>List of connected nodes.</returns>
         public List<QuestionNode> GetAllConnectedQuestionsFromNode(QuestionNode n)
         {
             return GetConnectedNodes(n);
         }
         
+        /// <summary>
+        /// Removes all links(edges) connected to the specified node
+        /// </summary>
+        /// <param name="n">The node to remove all links from</param>
         public void RemoveAllLinksFromQuestion(QuestionNode n)
         {
             int index = nodes.IndexOf(n);
