@@ -50,7 +50,7 @@ public class GraphConfig
         {
             findAndReplace.Remove(varName);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             return false;
         }
