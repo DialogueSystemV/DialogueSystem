@@ -25,7 +25,11 @@ namespace DialogueSystem
         public QuestionNode(string value, bool removeQuestionAfterAsked = false, params AnswerNode[] possibleAnswers) : base(value)
         {
             this.removeQuestionAfterAsked = removeQuestionAfterAsked;
-            this.possibleAnswers = possibleAnswers.ToList();
+            foreach (var answer in possibleAnswers)
+            {
+                answer.parent = this;
+                this.possibleAnswers.Add(answer);
+            }
         }
         
         /// <summary>

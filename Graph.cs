@@ -77,7 +77,9 @@ namespace DialogueSystem
                 adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = true;
             }
         }
-
+        
+        
+        
         internal void RemoveEdge(Edge edge)
         {
             if (!edges.Contains(edge)) { return; }
