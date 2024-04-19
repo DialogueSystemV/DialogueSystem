@@ -15,14 +15,14 @@ namespace DialogueSystem
         /// </summary>
         public GraphConfig vars {get; set;}
 
-        public Graph(List<QuestionNode> nodes, HashSet<Edge> edges, GraphConfig config)
+        public Graph(List<QuestionNode> nodes, HashSet<Edge> links, GraphConfig config)
         {
             vars = config;
             this.edges = new HashSet<Edge>();
             this.nodes = new List<QuestionNode>();
             AddNodes(nodes);
             adjList = new bool[this.nodes.Count, this.nodes.Count];
-            AddEdges(edges);
+            AddEdges(links);
         }
         
         /// <summary>
