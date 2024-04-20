@@ -2,7 +2,7 @@ namespace DialogueSystem
 {
     public abstract class Node
     {
-        private Guid ID;
+        public Guid ID { get; private set; }
         public string value { get; set; }
         public HashSet<QuestionNode> questionsToRemove { get; set; }
         public HashSet<QuestionNode> questionsToAdd { get; set; }
