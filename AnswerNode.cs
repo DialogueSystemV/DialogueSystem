@@ -21,6 +21,8 @@ namespace DialogueSystem
         /// Method that gets run when the answer gets chosen
         /// </summary>
         public Action? action { get; set; }
+        
+        public bool enabled { get; set; }
 
         internal QuestionNode parent;
         

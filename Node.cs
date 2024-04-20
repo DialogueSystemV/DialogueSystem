@@ -6,6 +6,9 @@ namespace DialogueSystem
         public string value { get; set; }
         public HashSet<QuestionNode> questionsToRemove { get; set; }
         public HashSet<QuestionNode> questionsToAdd { get; set; }
+        
+        public HashSet<AnswerNode> answersToRemove { get; set; }
+        public HashSet<AnswerNode> answersToAdd { get; set; }
 
         public Node(string Value)
         {
@@ -22,7 +25,6 @@ namespace DialogueSystem
 
         public virtual void ProcessEdit(Graph graph)
         {
-            
             foreach (var qNode in questionsToAdd)
             {
                 if (this is AnswerNode)
@@ -41,6 +43,16 @@ namespace DialogueSystem
                     graph.RemoveEdge(new Edge(answerNode.parent, qNode));
                 }
                 graph.RemoveEdge(new Edge((QuestionNode)this, qNode));
+            }
+
+            foreach (var aNode in answersToAdd)
+            {
+                aNode.enabled = true;
+            }
+            
+            foreach (var aNode in answersToRemove)
+            {
+                aNode.enabled = false;
             }
         }
     }

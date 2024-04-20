@@ -54,7 +54,7 @@ namespace DialogueSystem
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers = possibleAnswers.FindAll(PA => PA.condition == null || PA.condition(null));
+            EnabledAnswers = possibleAnswers.FindAll(PA => PA.enabled && (PA.condition == null || PA.condition(null)));
             if (EnabledAnswers.Count == 0)
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
