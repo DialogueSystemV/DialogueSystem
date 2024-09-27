@@ -25,7 +25,11 @@ namespace DialogueSystem
         public QuestionNode(string value, bool removeQuestionAfterAsked = false, params AnswerNode[] possibleAnswers) : base(value)
         {
             this.removeQuestionAfterAsked = removeQuestionAfterAsked;
-            this.possibleAnswers = possibleAnswers.ToList();
+            foreach (var answer in possibleAnswers)
+            {
+                answer.parent = this;
+                this.possibleAnswers.Add(answer);
+            }
         }
         
         /// <summary>
@@ -50,7 +54,7 @@ namespace DialogueSystem
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers = possibleAnswers.FindAll(PA => PA.condition == null || PA.condition(null));
+            EnabledAnswers = possibleAnswers.FindAll(PA => PA.enabled && (PA.condition == null || PA.condition(null)));
             if (EnabledAnswers.Count == 0)
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");

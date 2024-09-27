@@ -28,6 +28,12 @@ public class Conversation
         firstTime = true;
     }
 
+    /// <summary>
+    /// This method initializes the conversation by setting the starting edges and cloning the adjacency list.
+    /// Also, this method adds the initial items to the RNUI menu.
+    /// This method has to be called before Run(). Else, the conversation will not work.
+    /// </summary>
+    
     public void Init()
     {
         if (convoStarted) return;
@@ -45,6 +51,11 @@ public class Conversation
             convoMenu.AddItem(new UIMenuItem(item.value));
         }
     }
+    
+    /// <summary>
+    /// The converstion is active. This method will subscribe to the OnItemSelect event of the RNUI menu.
+    /// If your plugin is using the OnItemSelect for the menu that the conversation uses, the dialogue system will not work.
+    /// </summary>
     
     public void Run()
     {
@@ -68,7 +79,7 @@ public class Conversation
             EndConvo();
             return;
         }
-
+        
         UpdateMenu();
         if (connectedNodes.Count == 0)
         {

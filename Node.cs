@@ -2,17 +2,20 @@ namespace DialogueSystem
 {
     public abstract class Node
     {
-        private Guid ID;
+        public Guid ID { get; private set; }
         public string value { get; set; }
-        public HashSet<Edge> edgesToRemove { get; set; }
-        public HashSet<Edge> edgesToAdd { get; set; }
+        public HashSet<QuestionNode> questionsToRemove { get; set; }
+        public HashSet<QuestionNode> questionsToAdd { get; set; }
+        
+        public HashSet<AnswerNode> answersToRemove { get; set; }
+        public HashSet<AnswerNode> answersToAdd { get; set; }
 
         public Node(string Value)
         {
             this.value = Value;
             ID = new Guid();
-            edgesToAdd = new HashSet<Edge>();
-            edgesToRemove = new HashSet<Edge>();
+            questionsToAdd = new HashSet<QuestionNode>();
+            questionsToRemove = new HashSet<QuestionNode>();
         }
 
         static bool Equals(Node n1, Node n2)
@@ -22,8 +25,35 @@ namespace DialogueSystem
 
         public virtual void ProcessEdit(Graph graph)
         {
-            graph.RemoveEdges(edgesToRemove);
-            graph.AddEdges(edgesToAdd);
+            foreach (var qNode in questionsToAdd)
+            {
+                if (this is AnswerNode)
+                {
+                    var answerNode = (AnswerNode)this;
+                    graph.AddEdge(new Edge(answerNode.parent, qNode));
+                }
+                graph.AddEdge(new Edge((QuestionNode)this, qNode));
+            }
+            
+            foreach(var qNode in questionsToRemove)
+            {
+                if (this is AnswerNode)
+                {
+                    var answerNode = (AnswerNode)this;
+                    graph.RemoveEdge(new Edge(answerNode.parent, qNode));
+                }
+                graph.RemoveEdge(new Edge((QuestionNode)this, qNode));
+            }
+
+            foreach (var aNode in answersToAdd)
+            {
+                aNode.enabled = true;
+            }
+            
+            foreach (var aNode in answersToRemove)
+            {
+                aNode.enabled = false;
+            }
         }
     }
 }

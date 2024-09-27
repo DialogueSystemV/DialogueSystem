@@ -22,12 +22,17 @@ namespace DialogueSystem
               return !(f == g);
         }
         
-        public bool Equals(Edge other)
+        public override bool Equals(Object other)
         {
-            return Node.Equals(this.to, other.to) && Node.Equals(this.from, other.from);
+            if(!(other is Edge))
+                return false;
+            Edge edgeOther = (Edge)other;
+            return Node.Equals(this.to, edgeOther.to) && Node.Equals(this.from, edgeOther.from);
         }
-        
-        
-        
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
