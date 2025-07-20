@@ -3,8 +3,9 @@ namespace DialogueSystem
 {
     public class Graph
     {
-        internal HashSet<Edge> edges;
-        internal HashSet<Edge> startingEdges;
+        internal List<Edge> edges;
+        internal List<Edge> startingEdges;
+        internal List<QuestionNode> nodesToStartConversation;
         internal List<QuestionNode> nodes;
         internal bool[,] adjList;
         internal bool[,] startingAdjList;
@@ -15,10 +16,10 @@ namespace DialogueSystem
         /// </summary>
         public GraphConfig vars {get; set;}
 
-        public Graph(List<QuestionNode> nodes, HashSet<Edge> links, GraphConfig config)
+        public Graph(List<QuestionNode> nodes, List<Edge> links, GraphConfig config)
         {
             vars = config;
-            this.edges = new HashSet<Edge>();
+            this.edges = new List<Edge>();
             this.nodes = new List<QuestionNode>();
             AddNodes(nodes);
             adjList = new bool[this.nodes.Count, this.nodes.Count];
@@ -72,7 +73,7 @@ namespace DialogueSystem
         
         internal void AddEdge(Edge edge)
         {
-            if (edges.Add(edge))
+            if (edges.Contains(edge))
             {
                 adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = true;
             }
@@ -156,7 +157,7 @@ namespace DialogueSystem
             if (!nodes.Contains(n)) { return; }
             int index = nodes.IndexOf(n);
             nodes.RemoveAt(index);
-            edges.RemoveWhere(e => e.from.Equals(n) || e.to.Equals(n));
+            edges.RemoveAll(e => e.from.Equals(n) || e.to.Equals(n));
             RedoAdjList();
         }
 

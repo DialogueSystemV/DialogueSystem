@@ -9,7 +9,7 @@ public class Conversation
 {
     public Graph graph { get; private set; }
     private QuestionNode currNode;
-    private QuestionNode[] startNodes;
+    private List<QuestionNode> startNodes;
     public bool convoStarted { get; private set; }
     public UIMenu convoMenu;
     private List<QuestionNode> connectedNodes;
@@ -17,7 +17,7 @@ public class Conversation
     public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
     public event EventHandler OnCoversationEnded;
     
-    public Conversation(Graph graph, UIMenu convoMenu, params QuestionNode[] startNodes)
+    public Conversation(Graph graph, UIMenu convoMenu, List<QuestionNode> startNodes)
     {
         this.graph = graph;
         currNode = null;
@@ -37,7 +37,7 @@ public class Conversation
     public void Init()
     {
         if (convoStarted) return;
-        graph.startingEdges = new HashSet<Edge>(graph.edges);
+        graph.startingEdges = new List<Edge>(graph.edges);
         graph.CloneAdjList();
         UpdateMenu(true);
     }
@@ -60,7 +60,7 @@ public class Conversation
     public void Run()
     {
         convoMenu.OnItemSelect += OnItemSelect;
-        Game.DisplaySubtitle("Subbing to event");
+        Game.LogTrivial("Subbing to event");
     }
 
     private void OnItemSelect(UIMenu uiMenu, UIMenuItem selectedItem, int index)

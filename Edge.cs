@@ -1,17 +1,20 @@
+using Newtonsoft.Json;
+
 namespace DialogueSystem
 {
     public struct Edge
     {
-        public readonly QuestionNode from;
+        public string Id { get; set; }
+        public QuestionNode from;
 
-        public readonly QuestionNode to;
+        public QuestionNode to;
         
         public Edge(QuestionNode from, QuestionNode to)
         {
+            Id = Guid.NewGuid().ToString();
             this.from = from;
             this.to = to;
         }
-
         public static bool operator ==(Edge f, Edge g)
         {
             return f.Equals(g);

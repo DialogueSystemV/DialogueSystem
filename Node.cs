@@ -2,7 +2,7 @@ namespace DialogueSystem
 {
     public abstract class Node
     {
-        public Guid ID { get; private set; }
+        public string ID { get; internal set; }
         public string value { get; set; }
         public HashSet<QuestionNode> questionsToRemove { get; set; }
         public HashSet<QuestionNode> questionsToAdd { get; set; }
@@ -13,9 +13,14 @@ namespace DialogueSystem
         public Node(string Value)
         {
             this.value = Value;
-            ID = new Guid();
+            ID = Guid.NewGuid().ToString();
             questionsToAdd = new HashSet<QuestionNode>();
             questionsToRemove = new HashSet<QuestionNode>();
+        }
+
+        protected Node()
+        {
+            
         }
 
         static bool Equals(Node n1, Node n2)

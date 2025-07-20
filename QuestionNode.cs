@@ -11,6 +11,8 @@ namespace DialogueSystem
 
         private Random rndm = new Random(DateTime.Now.Millisecond);
         
+        public bool startsConversation = false;
+        
         /// <summary>
         /// Whether the question should be removed from the pool after being asked
         /// </summary>
@@ -30,6 +32,11 @@ namespace DialogueSystem
                 answer.parent = this;
                 this.possibleAnswers.Add(answer);
             }
+        }
+
+        public QuestionNode() : base()
+        {
+            
         }
         
         /// <summary>
@@ -54,7 +61,7 @@ namespace DialogueSystem
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers = possibleAnswers.FindAll(PA => PA.enabled && (PA.condition == null || PA.condition(null)));
+            // EnabledAnswers = possibleAnswers.FindAll(PA => PA.enabled && (PA.condition == null || PA.condition(null)));
             if (EnabledAnswers.Count == 0)
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");

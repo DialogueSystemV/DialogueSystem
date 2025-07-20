@@ -32,7 +32,13 @@ namespace DialogueSystem
             this.probability = probability;
             this.endsConversation = endsConversation;
             this.action = action;
+            enabled = true;
 
+        }
+
+        internal AnswerNode() : base()
+        {
+            
         }
     }
 
