@@ -14,9 +14,9 @@ public class Conversation
     public UIMenu convoMenu;
     private List<QuestionNode> connectedNodes;
     private bool firstTime;
-    public event EventHandler<(QuestionNode,AnswerNode)> OnQuestionSelect;
+    public event EventHandler<(QuestionNode, AnswerNode)> OnQuestionSelect;
     public event EventHandler OnCoversationEnded;
-    
+
     public Conversation(Graph graph, UIMenu convoMenu, List<QuestionNode> startNodes)
     {
         this.graph = graph;
@@ -33,7 +33,6 @@ public class Conversation
     /// Also, this method adds the initial items to the RNUI menu.
     /// This method has to be called before Run(). Else, the conversation will not work.
     /// </summary>
-    
     public void Init()
     {
         if (convoStarted) return;
@@ -45,18 +44,25 @@ public class Conversation
     private void UpdateMenu(bool start = false)
     {
         convoMenu.Clear();
-        connectedNodes = graph.GetConnectedNodes(currNode);
+        if (!start)
+        {
+            connectedNodes = graph.GetConnectedNodes(currNode);
+            if (currNode != null && !currNode.removeQuestionAfterAsked)
+            {
+                Game.LogTrivial($"adding ${currNode.value} cuz removeQuestionAfterAsked false");
+                convoMenu.AddItem(new UIMenuItem(currNode.value));
+            }
+        }
         foreach (var item in start ? startNodes.ToList() : connectedNodes)
         {
             convoMenu.AddItem(new UIMenuItem(item.value));
         }
     }
-    
+
     /// <summary>
     /// The converstion is active. This method will subscribe to the OnItemSelect event of the RNUI menu.
     /// If your plugin is using the OnItemSelect for the menu that the conversation uses, the dialogue system will not work.
     /// </summary>
-    
     public void Run()
     {
         convoMenu.OnItemSelect += OnItemSelect;
@@ -65,38 +71,42 @@ public class Conversation
 
     private void OnItemSelect(UIMenu uiMenu, UIMenuItem selectedItem, int index)
     {
-        Game.LogTrivial("In Dialogue System item select");
-        AnswerNode answer = null;
-        QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
-        currNode = qNode;
-        Game.DisplaySubtitle(qNode.value);
-        answer = qNode.ChooseQuestion(graph);
-        OnQuestionSelect?.Invoke(this, (qNode, answer));
-        Game.DisplaySubtitle(answer.value);
-        if (answer.action != null) answer.action();
-        if (answer.endsConversation)
+        GameFiber.StartNew(delegate
         {
-            EndConvo();
-            return;
-        }
-        
-        UpdateMenu();
-        if (connectedNodes.Count == 0)
-        {
-            EndConvo();
-        }
-        convoStarted = true;
-        firstTime = false;
+            Game.LogTrivial("In Dialogue System item select");
+            AnswerNode answer = null;
+            QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
+            currNode = qNode;
+            Game.DisplaySubtitle(qNode.value);
+            answer = qNode.ChooseQuestion(graph);
+            OnQuestionSelect?.Invoke(this, (qNode, answer));
+            Game.DisplaySubtitle(answer.value);
+            if (answer.action != null) answer.action();
+            if (answer.endsConversation)
+            {
+                EndConvo();
+                return;
+            }
+
+            UpdateMenu();
+            if (connectedNodes.Count == 0)
+            {
+                EndConvo();
+            }
+
+            convoStarted = true;
+            firstTime = false;
+        });
     }
 
     private void EndConvo()
     {
         convoMenu.Close();
-        Game.DisplaySubtitle("Conversation Ended");
-        foreach(QuestionNode q in graph.nodes)
+        foreach (QuestionNode q in graph.nodes)
         {
             q.ResetChosenAnswer();
         }
+
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
@@ -105,5 +115,4 @@ public class Conversation
         currNode = null;
         OnCoversationEnded?.Invoke(this, EventArgs.Empty);
     }
-    
 }

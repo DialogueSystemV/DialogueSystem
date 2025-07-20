@@ -1,4 +1,5 @@
 using static DialogueSystem.ListExtensions;
+
 namespace DialogueSystem
 {
     public class Graph
@@ -9,12 +10,12 @@ namespace DialogueSystem
         internal List<QuestionNode> nodes;
         internal bool[,] adjList;
         internal bool[,] startingAdjList;
-        
-        
+
+
         /// <summary>
         /// GraphConfig that will allow to use variables in the questions and answers
         /// </summary>
-        public GraphConfig vars {get; set;}
+        public GraphConfig vars { get; set; }
 
         public Graph(List<QuestionNode> nodes, List<Edge> links, GraphConfig config)
         {
@@ -25,7 +26,7 @@ namespace DialogueSystem
             adjList = new bool[this.nodes.Count, this.nodes.Count];
             AddEdges(links);
         }
-        
+
         /// <summary>
         /// Adds a(n) link(edge) between the specified nodes
         /// </summary>
@@ -35,7 +36,7 @@ namespace DialogueSystem
         {
             AddEdge(new Edge(fromNode, toNode));
         }
-        
+
         /// <summary>
         /// Removes a(n) link(edge) between the specified nodes
         /// </summary>
@@ -55,7 +56,7 @@ namespace DialogueSystem
         {
             return GetConnectedNodes(n);
         }
-        
+
         /// <summary>
         /// Removes all links(edges) connected to the specified node
         /// </summary>
@@ -65,61 +66,57 @@ namespace DialogueSystem
             int index = nodes.IndexOf(n);
             for (int i = 0; i < adjList.GetLength(1); i++)
             {
-                adjList[index, i] = false; 
+                adjList[index, i] = false;
             }
         }
-        
 
-        
+
         internal void AddEdge(Edge edge)
         {
-            if (edges.Contains(edge))
+            if (!edges.Contains(edge))
             {
                 adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = true;
+                edges.Add(edge);
             }
         }
-        
-        
-        
+
+
         internal void RemoveEdge(Edge edge)
         {
-            if (!edges.Contains(edge)) { return; }
+            if (!edges.Contains(edge))
+            {
+                return;
+            }
+
             adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = false;
             edges.Remove(edge);
         }
-        
+
         internal void RemoveEdges(HashSet<Edge> edges)
         {
-            foreach (Edge e in edges) 
-            {
-                RemoveEdge(e);
-            }
-        }
-        
-        internal void RemoveEdges(List<Edge> edges)
-        {
-            foreach (Edge e in edges) 
+            foreach (Edge e in edges)
             {
                 RemoveEdge(e);
             }
         }
 
-        internal void AddEdges(HashSet<Edge> edges)
+        internal void RemoveEdges(List<Edge> edges)
         {
             foreach (Edge e in edges)
             {
-                AddEdge(e);
+                RemoveEdge(e);
             }
         }
-        
+
         internal void AddEdges(List<Edge> edges)
         {
             foreach (Edge e in edges)
             {
+                Console.WriteLine($"{e.from.value}, {e.to.value}");
                 AddEdge(e);
             }
         }
-        
+
         private void AddNodes(List<QuestionNode> nodes)
         {
             foreach (QuestionNode e in nodes)
@@ -134,10 +131,19 @@ namespace DialogueSystem
             {
                 return false;
             }
+
             nodes.Add(n);
             vars.ReplaceVariables(n);
-            foreach(var na in n.possibleAnswers) {vars.ReplaceVariables(na);}
-            if (!partOfList) {RedoAdjList();}
+            foreach (var na in n.possibleAnswers)
+            {
+                vars.ReplaceVariables(na);
+            }
+
+            if (!partOfList)
+            {
+                RedoAdjList();
+            }
+
             return true;
         }
 
@@ -154,7 +160,11 @@ namespace DialogueSystem
 
         private void RemoveNode(QuestionNode n)
         {
-            if (!nodes.Contains(n)) { return; }
+            if (!nodes.Contains(n))
+            {
+                return;
+            }
+
             int index = nodes.IndexOf(n);
             nodes.RemoveAt(index);
             edges.RemoveAll(e => e.from.Equals(n) || e.to.Equals(n));
@@ -169,6 +179,7 @@ namespace DialogueSystem
                 // If the index is out of range, return an empty list
                 return new List<QuestionNode>();
             }
+
             int colLength = adjList.GetLength(1);
             List<QuestionNode> result = new List<QuestionNode>();
             for (int i = 0; i < colLength; i++)
@@ -178,10 +189,10 @@ namespace DialogueSystem
                     result.Add(nodes[i]);
                 }
             }
-    
+
             return result;
         }
-        
+
         internal void CloneAdjList()
         {
             int rows = adjList.GetLength(0);
@@ -196,6 +207,7 @@ namespace DialogueSystem
                     newArray[i, j] = adjList[i, j];
                 }
             }
+
             startingAdjList = newArray;
         }
     }

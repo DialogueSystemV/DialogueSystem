@@ -50,7 +50,7 @@ public class DialogueLoader
                         {
                             ID = (string)answerToken["id"],
                             value = (string)answerToken["text"],
-                            probability = (int?)answerToken["probability"] ?? 10, // Handle nullable/missing
+                            probability = (int)answerToken["probability"], // Handle nullable/missing
                             // condition = (string)answerToken["condition"],
                             endsConversation = (bool?)answerToken["endsCondition"] ?? false,
                             // action = (string)answerToken["action"] // TODO extra parsing
@@ -82,13 +82,13 @@ public class DialogueLoader
                 {
                     sNodes.Add(node);
                 }
-                if (nodeLookup.ContainsKey(node.ID)) // Add to lookup dictionary
+                if (nodeLookup.ContainsKey(id)) // Add to lookup dictionary
                 {
                     Console.WriteLine(
                         $"Error: Duplicate Node ID found while parsing: {node.ID}. Only the first instance will be used for connections.");
                     // You might want to skip adding the duplicate or handle it differently
                 }
-                nodeLookup.Add(node.ID, node);
+                nodeLookup.Add(id, node);
             }
         }
 
@@ -131,12 +131,8 @@ public class DialogueLoader
                 }
 
                 // Create and add the Edge object
-                edges.Add(new Edge
-                {
-                    Id = edgeId,
-                    from = fromNode,
-                    to = toNode
-                });
+                Game.LogTrivial($"adding edge from {fromNode.value} to {toNode.value}");
+                edges.Add(new Edge(fromNode, toNode));
             }
         }
 

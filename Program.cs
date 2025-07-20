@@ -34,12 +34,12 @@ namespace csharpdsa
 
             try
             {
-                Graph graph = JsonHelper.ParseGraphManually(jsonContent);
+                Graph graph = DialogueLoader.ParseGraphManually(jsonContent);
 
                 Console.WriteLine("\n--- Manual Parsing Results ---");
                 Console.WriteLine($"Total Nodes: {graph.nodes.Count}");
                 Console.WriteLine($"Total Edges: {graph.edges.Count}");
-
+                Console.WriteLine(graph.GetConnectedNodes(graph.nodes[0]));
                 foreach (Node node in graph.nodes)
                 {
                     Console.WriteLine(
