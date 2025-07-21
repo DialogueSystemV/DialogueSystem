@@ -9,11 +9,9 @@ public class Conversation
 {
     public Graph graph { get; private set; }
     private QuestionNode currNode;
-    private List<QuestionNode> startNodes;
     public bool convoStarted { get; private set; }
     public UIMenu convoMenu;
-    private List<QuestionNode> connectedNodes;
-    private bool firstTime;
+    private List<QuestionNode> questionPool;
     public event EventHandler<(QuestionNode, AnswerNode)> OnQuestionSelect;
     public event EventHandler OnCoversationEnded;
 
@@ -21,11 +19,10 @@ public class Conversation
     {
         this.graph = graph;
         currNode = null;
-        this.startNodes = startNodes;
         convoStarted = false;
         this.convoMenu = convoMenu;
-        connectedNodes = new List<QuestionNode>();
-        firstTime = true;
+        questionPool = new List<QuestionNode>();
+        questionPool.AddRange(startNodes);
     }
 
     /// <summary>
@@ -46,15 +43,20 @@ public class Conversation
         convoMenu.Clear();
         if (!start)
         {
-            connectedNodes = graph.GetConnectedNodes(currNode);
-            if (currNode != null && !currNode.removeQuestionAfterAsked)
+            if (currNode != null && currNode.removeQuestionAfterAsked)
             {
-                Game.LogTrivial($"adding ${currNode.value} cuz removeQuestionAfterAsked false");
-                convoMenu.AddItem(new UIMenuItem(currNode.value));
+                Game.LogTrivial(
+                    $"Removed {currNode.value} due to removeQuestionAfterAsked being true");
+                questionPool.Remove(currNode);
             }
+            var list = graph.GetConnectedNodes(currNode);
+            Game.LogTrivial($"Adding all nodes({list.Count}) connected to {currNode.value} to the questionPool");
+            questionPool.AddRange(list);
         }
-        foreach (var item in start ? startNodes.ToList() : connectedNodes)
+
+        foreach (var item in questionPool)
         {
+            Game.LogTrivial($"Adding {item.value} to the menu");
             convoMenu.AddItem(new UIMenuItem(item.value));
         }
     }
@@ -75,10 +77,12 @@ public class Conversation
         {
             Game.LogTrivial("In Dialogue System item select");
             AnswerNode answer = null;
-            QuestionNode qNode = firstTime ? startNodes.ToList()[index] : connectedNodes[index];
+            QuestionNode qNode = questionPool[index];
             currNode = qNode;
             Game.DisplaySubtitle(qNode.value);
             answer = qNode.ChooseQuestion(graph);
+            Game.LogTrivial($"Question chosen: {qNode.value}");
+            Game.LogTrivial($"Answer chosen: {answer.value}");
             OnQuestionSelect?.Invoke(this, (qNode, answer));
             Game.DisplaySubtitle(answer.value);
             if (answer.action != null) answer.action();
@@ -87,31 +91,28 @@ public class Conversation
                 EndConvo();
                 return;
             }
-
             UpdateMenu();
-            if (connectedNodes.Count == 0)
+            if (questionPool.Count == 0)
             {
                 EndConvo();
             }
 
             convoStarted = true;
-            firstTime = false;
         });
     }
 
     private void EndConvo()
     {
+        Game.LogTrivial("Ending Conversation");
         convoMenu.Close();
         foreach (QuestionNode q in graph.nodes)
         {
             q.ResetChosenAnswer();
         }
-
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
         convoStarted = false;
-        firstTime = true;
         currNode = null;
         OnCoversationEnded?.Invoke(this, EventArgs.Empty);
     }

@@ -1,7 +1,10 @@
+using KaimiraGames;
+using Rage;
+
 namespace DialogueSystem
 {
     public class QuestionNode : Node
-    { 
+    {
         /// <summary>
         /// List of possible answers to the question
         /// </summary>
@@ -10,35 +13,38 @@ namespace DialogueSystem
         private AnswerNode chosenAnswer = null;
 
         private Random rndm = new Random(DateTime.Now.Millisecond);
-        
+
         public bool startsConversation = false;
-        
+        private WeightedList<AnswerNode> _weightedAnswers;
+
         /// <summary>
         /// Whether the question should be removed from the pool after being asked
         /// </summary>
         public bool removeQuestionAfterAsked { get; set; }
-        
+
         /// <summary>
         /// Instantiates a new node with the given question and possible answers
         /// </summary>
         /// <param name="value">Question wanting to be asked</param>
         /// <param name="removeQuestionAfterAsked">Whether the question should be removed from the pool after being asked</param>
         /// <param name="possibleAnswers">array of all answers as AnswerNode object</param>
-        public QuestionNode(string value, bool removeQuestionAfterAsked = false, params AnswerNode[] possibleAnswers) : base(value)
+        public QuestionNode(string value, bool removeQuestionAfterAsked = false,
+            params AnswerNode[] possibleAnswers) : base(value)
         {
             this.removeQuestionAfterAsked = removeQuestionAfterAsked;
             foreach (var answer in possibleAnswers)
             {
                 answer.parent = this;
                 this.possibleAnswers.Add(answer);
+                _weightedAnswers = new WeightedList<AnswerNode>(rndm);
+                _weightedAnswers.Add(answer, answer.probability);
             }
         }
 
         public QuestionNode() : base()
         {
-            
         }
-        
+
         /// <summary>
         /// Chooses the answer to the question based on the probability of the answer
         /// and conditions provided
@@ -53,10 +59,12 @@ namespace DialogueSystem
                 ProcessEdit(graph);
                 node.ProcessEdit(graph);
             }
+            Game.LogTrivial($"Setting {node.value} to the answer of {value}");
+            chosenAnswer = node;
             return node;
         }
-        
-        
+
+
         private AnswerNode ChooseAnswer()
         {
             if (chosenAnswer != null) return chosenAnswer;
@@ -66,9 +74,8 @@ namespace DialogueSystem
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
             }
-            double maxProbability = EnabledAnswers.Max(node => node.probability);
-            List<AnswerNode> nodesWithHighestProbability = EnabledAnswers.Where(node => node.probability == maxProbability).ToList();
-            chosenAnswer = nodesWithHighestProbability[rndm.Next(nodesWithHighestProbability.Count)];
+            Game.LogTrivial($"Adding all answers of {chosenAnswer.value} to weighted list");
+            chosenAnswer = _weightedAnswers.Next();
             return chosenAnswer;
         }
 
@@ -78,7 +85,10 @@ namespace DialogueSystem
         /// <param name="graph">Graph which the question is associated with</param>
         public override void ProcessEdit(Graph graph)
         {
-            if (removeQuestionAfterAsked) graph.RemoveAllLinksFromQuestion(this);
+            if (removeQuestionAfterAsked)
+            {
+                graph.RemoveAllLinksFromQuestion(this);
+            }
             base.ProcessEdit(graph);
         }
 
@@ -92,5 +102,5 @@ namespace DialogueSystem
         {
             chosenAnswer = null;
         }
-     }
+    }
 }
