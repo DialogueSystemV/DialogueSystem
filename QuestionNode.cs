@@ -36,8 +36,6 @@ namespace DialogueSystem
             {
                 answer.parent = this;
                 this.possibleAnswers.Add(answer);
-                _weightedAnswers = new WeightedList<AnswerNode>(rndm);
-                _weightedAnswers.Add(answer, answer.probability);
             }
         }
 
@@ -59,6 +57,7 @@ namespace DialogueSystem
                 ProcessEdit(graph);
                 node.ProcessEdit(graph);
             }
+
             Game.LogTrivial($"Setting {node.value} to the answer of {value}");
             chosenAnswer = node;
             return node;
@@ -74,8 +73,13 @@ namespace DialogueSystem
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
             }
-            Game.LogTrivial($"Adding all answers of {chosenAnswer.value} to weighted list");
+            _weightedAnswers = new WeightedList<AnswerNode>(rndm);
+            foreach (var aNode in EnabledAnswers)
+            {
+                _weightedAnswers.Add(aNode, aNode.probability);
+            }
             chosenAnswer = _weightedAnswers.Next();
+            Game.LogTrivial($"Adding all answers of {chosenAnswer.value} to weighted list");
             return chosenAnswer;
         }
 
@@ -89,6 +93,7 @@ namespace DialogueSystem
             {
                 graph.RemoveAllLinksFromQuestion(this);
             }
+
             base.ProcessEdit(graph);
         }
 

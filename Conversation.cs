@@ -14,6 +14,7 @@ public class Conversation
     private List<QuestionNode> questionPool;
     public event EventHandler<(QuestionNode, AnswerNode)> OnQuestionSelect;
     public event EventHandler OnCoversationEnded;
+    private GameFiber onItemSelectFiber;
 
     public Conversation(Graph graph, UIMenu convoMenu, List<QuestionNode> startNodes)
     {
@@ -43,15 +44,17 @@ public class Conversation
         convoMenu.Clear();
         if (!start)
         {
-            if (currNode != null && currNode.removeQuestionAfterAsked)
+            var list = graph.GetConnectedNodes(currNode);
+            Game.LogTrivial(
+                $"Adding all nodes({list.Count}) connected to {currNode.value} to the questionPool");
+            questionPool.Clear();
+            questionPool.AddRange(list);
+            if (currNode != null && !currNode.removeQuestionAfterAsked)
             {
                 Game.LogTrivial(
-                    $"Removed {currNode.value} due to removeQuestionAfterAsked being true");
-                questionPool.Remove(currNode);
+                    $"Adding {currNode.value} back due to removeQuestionAfterAsked being false");
+                questionPool.Add(currNode);
             }
-            var list = graph.GetConnectedNodes(currNode);
-            Game.LogTrivial($"Adding all nodes({list.Count}) connected to {currNode.value} to the questionPool");
-            questionPool.AddRange(list);
         }
 
         foreach (var item in questionPool)
@@ -67,38 +70,51 @@ public class Conversation
     /// </summary>
     public void Run()
     {
-        convoMenu.OnItemSelect += OnItemSelect;
+        convoMenu.OnItemSelect += ItemSelectWarapper;
         Game.LogTrivial("Subbing to event");
+    }
+
+    private void ItemSelectWarapper(UIMenu uiMenu, UIMenuItem selectedItem, int index)
+    {
+        if (onItemSelectFiber == null || !onItemSelectFiber.IsAlive)
+        {
+            onItemSelectFiber = GameFiber.StartNew(delegate
+            {
+                OnItemSelect(uiMenu, selectedItem, index);
+            });
+        }
+        else
+        {
+            Game.LogTrivial("Item selection ignored: Another fiber is already processing.");
+        }
     }
 
     private void OnItemSelect(UIMenu uiMenu, UIMenuItem selectedItem, int index)
     {
-        GameFiber.StartNew(delegate
+        Game.LogTrivial("In Dialogue System item select");
+        AnswerNode answer = null;
+        QuestionNode qNode = questionPool[index];
+        currNode = qNode;
+        Game.DisplaySubtitle(qNode.value);
+        answer = qNode.ChooseQuestion(graph);
+        Game.LogTrivial($"Question chosen: {qNode.value}");
+        Game.LogTrivial($"Answer chosen: {answer.value}");
+        OnQuestionSelect?.Invoke(this, (qNode, answer));
+        Game.DisplaySubtitle(answer.value);
+        if (answer.action != null) answer.action();
+        if (answer.endsConversation)
         {
-            Game.LogTrivial("In Dialogue System item select");
-            AnswerNode answer = null;
-            QuestionNode qNode = questionPool[index];
-            currNode = qNode;
-            Game.DisplaySubtitle(qNode.value);
-            answer = qNode.ChooseQuestion(graph);
-            Game.LogTrivial($"Question chosen: {qNode.value}");
-            Game.LogTrivial($"Answer chosen: {answer.value}");
-            OnQuestionSelect?.Invoke(this, (qNode, answer));
-            Game.DisplaySubtitle(answer.value);
-            if (answer.action != null) answer.action();
-            if (answer.endsConversation)
-            {
-                EndConvo();
-                return;
-            }
-            UpdateMenu();
-            if (questionPool.Count == 0)
-            {
-                EndConvo();
-            }
+            EndConvo();
+            return;
+        }
 
-            convoStarted = true;
-        });
+        UpdateMenu();
+        if (questionPool.Count == 0)
+        {
+            EndConvo();
+        }
+
+        convoStarted = true;
     }
 
     private void EndConvo()
@@ -109,6 +125,7 @@ public class Conversation
         {
             q.ResetChosenAnswer();
         }
+
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
