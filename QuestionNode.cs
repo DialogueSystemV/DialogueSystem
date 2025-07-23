@@ -49,9 +49,9 @@ namespace DialogueSystem
         /// </summary>
         /// <param name="graph">Graph which the question is associated with</param>
         /// <returns>The AnswerNode chosen</returns>
-        public AnswerNode ChooseQuestion(Graph graph)
+        public AnswerNode ChooseQuestion(Graph graph, Conversation convo)
         {
-            AnswerNode node = ChooseAnswer();
+            AnswerNode node = ChooseAnswer(graph, convo);
             if (chosenAnswer == null)
             {
                 ProcessEdit(graph);
@@ -64,24 +64,46 @@ namespace DialogueSystem
         }
 
 
-        private AnswerNode ChooseAnswer()
+        private AnswerNode ChooseAnswer(Graph graph, Conversation convo)
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers = possibleAnswers.FindAll(PA => PA.enabled && (PA.condition == null || PA.condition.Invoke()));
+            EnabledAnswers =
+                possibleAnswers.FindAll(PA => PA.enabled && IsAnswerConditionMet(PA, convo));
             EnabledAnswers = possibleAnswers;
             if (EnabledAnswers.Count == 0)
             {
                 throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
             }
+
             _weightedAnswers = new WeightedList<AnswerNode>(rndm);
             foreach (var aNode in EnabledAnswers)
             {
                 _weightedAnswers.Add(aNode, aNode.probability);
             }
+
             chosenAnswer = _weightedAnswers.Next();
             Game.LogTrivial($"Adding all answers of {chosenAnswer.value} to weighted list");
             return chosenAnswer;
+        }
+
+        private bool IsAnswerConditionMet(AnswerNode answerNode, Conversation convo)
+        {
+            // If there's no condition, it's always met
+            if (answerNode.condition == null)
+            {
+                return true;
+            }
+
+            // Try to get the cached result from the condition pool
+            if (convo.conditionPool.TryGetValue(answerNode.ID, out bool cachedConditionResult))
+            {
+                return cachedConditionResult;
+            }
+
+            // If not in cache (should ideally not happen if conditions are pre-computed),
+            // invoke the condition directly as a fallback.
+            return answerNode.condition.Invoke();
         }
 
         /// <summary>

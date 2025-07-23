@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Windows.Forms;
 using Rage;
 using RAGENativeUI;
@@ -15,6 +16,10 @@ public class Conversation
     public event EventHandler<(QuestionNode, AnswerNode)> OnQuestionSelect;
     public event EventHandler OnCoversationEnded;
     private GameFiber onItemSelectFiber;
+    private GameFiber conditionCheckFiber;
+    internal Dictionary<string, bool> conditionPool;
+    private CancellationTokenSource conditionCancellationTokenSource;
+
 
     public Conversation(Graph graph, UIMenu convoMenu, List<QuestionNode> startNodes)
     {
@@ -24,6 +29,7 @@ public class Conversation
         this.convoMenu = convoMenu;
         questionPool = new List<QuestionNode>();
         questionPool.AddRange(startNodes);
+        conditionPool = new Dictionary<string, bool>();
     }
 
     /// <summary>
@@ -71,7 +77,83 @@ public class Conversation
     public void Run()
     {
         convoMenu.OnItemSelect += ItemSelectWarapper;
-        Game.LogTrivial("Subbing to event");
+        convoMenu.OnMenuOpen += StartCheckingConditions;
+        convoMenu.OnMenuClose += StopCheckingConditions;
+        Game.LogTrivial("Subbing to events");
+    }
+
+    private void StartCheckingConditions(UIMenu sender)
+    {
+        if (conditionCheckFiber != null && conditionCheckFiber.IsAlive)
+        {
+            Game.LogTrivial("Condition checking fiber already running.");
+            return;
+        }
+        conditionCancellationTokenSource = new CancellationTokenSource();
+        CancellationToken cancellationToken = conditionCancellationTokenSource.Token;
+
+        conditionCheckFiber = GameFiber.StartNew(() =>
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    CheckConditions();
+                    GameFiber.Yield();
+                    GameFiber.Sleep(1500);
+                }
+            }
+            catch (ThreadAbortException)
+            {
+                Game.LogTrivial("Condition check fiber aborted (unexpectedly).");
+            }
+            catch (Exception ex)
+            {
+                Game.LogTrivial($"Error in condition check fiber: {ex}");
+            }
+            finally
+            {
+                Game.LogTrivial("Condition check fiber stopped.");
+                conditionCancellationTokenSource?.Dispose();
+                conditionCancellationTokenSource = null;
+            }
+        });
+        Game.LogTrivial("Condition checking fiber started.");
+    }
+
+    private void StopCheckingConditions(UIMenu sender)
+    {
+        if (conditionCancellationTokenSource != null &&
+            !conditionCancellationTokenSource.IsCancellationRequested)
+        {
+            Game.LogTrivial("Requesting condition check fiber to stop...");
+            conditionCancellationTokenSource.Cancel();
+        }
+        else if (conditionCheckFiber == null || !conditionCheckFiber.IsAlive)
+        {
+            Game.LogTrivial("Condition checking fiber is not running or already stopped.");
+        }
+    }
+
+    private void CheckConditions()
+    {
+        foreach (var qNode in questionPool)
+        {
+            foreach (var aNode in qNode.possibleAnswers)
+            {
+                if (aNode.condition != null)
+                {
+                    if (conditionPool.ContainsKey(aNode.ID))
+                    {
+                        conditionPool[aNode.ID] = aNode.condition.Invoke();
+                    }
+                    else
+                    {
+                        conditionPool.Add(aNode.ID, aNode.condition.Invoke());
+                    }
+                }
+            }
+        }
     }
 
     private void ItemSelectWarapper(UIMenu uiMenu, UIMenuItem selectedItem, int index)
@@ -96,7 +178,7 @@ public class Conversation
         QuestionNode qNode = questionPool[index];
         currNode = qNode;
         Game.DisplaySubtitle(qNode.value);
-        answer = qNode.ChooseQuestion(graph);
+        answer = qNode.ChooseQuestion(graph, this);
         Game.LogTrivial($"Question chosen: {qNode.value}");
         Game.LogTrivial($"Answer chosen: {answer.value}");
         OnQuestionSelect?.Invoke(this, (qNode, answer));
@@ -129,6 +211,8 @@ public class Conversation
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
+        convoMenu.OnMenuOpen -= StartCheckingConditions;
+        convoMenu.OnMenuClose -= StopCheckingConditions;
         convoStarted = false;
         currNode = null;
         OnCoversationEnded?.Invoke(this, EventArgs.Empty);
