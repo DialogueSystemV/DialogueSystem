@@ -1,93 +1,122 @@
 using static DialogueSystem.ListExtensions;
+
 namespace DialogueSystem
 {
     public class Graph
     {
-        internal HashSet<Edge> edges;
-        internal HashSet<Edge> startingEdges;
+        internal List<Edge> edges;
+        internal List<Edge> startingEdges;
+        internal List<QuestionNode> nodesToStartConversation;
         internal List<QuestionNode> nodes;
         internal bool[,] adjList;
         internal bool[,] startingAdjList;
-        public GraphConfig vars {get; set;}
 
-        public Graph(List<QuestionNode> nodes, HashSet<Edge> edges, GraphConfig config)
+
+        /// <summary>
+        /// GraphConfig that will allow to use variables in the questions and answers
+        /// </summary>
+        public GraphConfig vars { get; set; }
+
+        public Graph(List<QuestionNode> nodes, List<Edge> links, GraphConfig config)
         {
             vars = config;
-            this.edges = new HashSet<Edge>();
+            this.edges = new List<Edge>();
             this.nodes = new List<QuestionNode>();
             AddNodes(nodes);
             adjList = new bool[this.nodes.Count, this.nodes.Count];
-            AddEdges(edges);
-        }
-        
-
-        public void AddEdge(Edge edge)
-        {
-            if (edges.Add(edge))
-            {
-                adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = true;
-            }
+            AddEdges(links);
         }
 
-        public void RemoveEdge(Edge edge)
-        {
-            if (!edges.Contains(edge)) { return; }
-            adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = false;
-            edges.Remove(edge);
-        }
-        
+        /// <summary>
+        /// Adds a(n) link(edge) between the specified nodes
+        /// </summary>
+        /// <param name="fromNode">The source node</param>
+        /// <param name="toNode">The destination node</param>
         public void LinkQuestions(QuestionNode fromNode, QuestionNode toNode)
         {
             AddEdge(new Edge(fromNode, toNode));
         }
-        
+
+        /// <summary>
+        /// Removes a(n) link(edge) between the specified nodes
+        /// </summary>
+        /// <param name="fromNode">The source node</param>
+        /// <param name="toNode">The destination node</param>
         public void RemoveLink(QuestionNode fromNode, QuestionNode toNode)
         {
             RemoveEdge(new Edge(fromNode, toNode));
         }
 
+        /// <summary>
+        /// Gets all connected questions from the specified node
+        /// </summary>
+        /// <param name="n">The node to get connected nodes from</param>
+        /// <returns>List of connected nodes.</returns>
+        public List<QuestionNode> GetAllConnectedQuestionsFromNode(QuestionNode n)
+        {
+            return GetConnectedNodes(n);
+        }
+
+        /// <summary>
+        /// Removes all links(edges) connected to the specified node
+        /// </summary>
+        /// <param name="n">The node to remove all links from</param>
         public void RemoveAllLinksFromQuestion(QuestionNode n)
         {
             int index = nodes.IndexOf(n);
             for (int i = 0; i < adjList.GetLength(1); i++)
             {
-                adjList[index, i] = false; 
+                adjList[index, i] = false;
             }
         }
-        
 
-        public void RemoveEdges(HashSet<Edge> edges)
+
+        internal void AddEdge(Edge edge)
         {
-            foreach (Edge e in edges) 
+            if (!edges.Contains(edge))
+            {
+                adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = true;
+                edges.Add(edge);
+            }
+        }
+
+
+        internal void RemoveEdge(Edge edge)
+        {
+            if (!edges.Contains(edge))
+            {
+                return;
+            }
+
+            adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = false;
+            edges.Remove(edge);
+        }
+
+        internal void RemoveEdges(HashSet<Edge> edges)
+        {
+            foreach (Edge e in edges)
             {
                 RemoveEdge(e);
             }
         }
-        
-        public void RemoveEdges(List<Edge> edges)
+
+        internal void RemoveEdges(List<Edge> edges)
         {
-            foreach (Edge e in edges) 
+            foreach (Edge e in edges)
             {
                 RemoveEdge(e);
             }
         }
 
-        public void AddEdges(HashSet<Edge> edges)
+        internal void AddEdges(List<Edge> edges)
         {
             foreach (Edge e in edges)
             {
+                Console.WriteLine($"{e.from.value}, {e.to.value}");
                 AddEdge(e);
             }
         }
-        
-        public void AddEdges(List<Edge> edges)
-        {
-            foreach (Edge e in edges)
-            {
-                AddEdge(e);
-            }
-        }
-        
+
         private void AddNodes(List<QuestionNode> nodes)
         {
             foreach (QuestionNode e in nodes)
@@ -102,10 +131,19 @@ namespace DialogueSystem
             {
                 return false;
             }
+
             nodes.Add(n);
             vars.ReplaceVariables(n);
-            foreach(var na in n.possibleAnswers) {vars.ReplaceVariables(na);}
-            if (!partOfList) {RedoAdjList();}
+            foreach (var na in n.possibleAnswers)
+            {
+                vars.ReplaceVariables(na);
+            }
+
+            if (!partOfList)
+            {
+                RedoAdjList();
+            }
+
             return true;
         }
 
@@ -122,14 +160,18 @@ namespace DialogueSystem
 
         private void RemoveNode(QuestionNode n)
         {
-            if (!nodes.Contains(n)) { return; }
+            if (!nodes.Contains(n))
+            {
+                return;
+            }
+
             int index = nodes.IndexOf(n);
             nodes.RemoveAt(index);
-            edges.RemoveWhere(e => e.from.Equals(n) || e.to.Equals(n));
+            edges.RemoveAll(e => e.from.Equals(n) || e.to.Equals(n));
             RedoAdjList();
         }
 
-        public List<QuestionNode> GetConnectedNodes(QuestionNode node)
+        internal List<QuestionNode> GetConnectedNodes(QuestionNode node)
         {
             int colIndex = nodes.IndexOf(node);
             if (colIndex == -1)
@@ -137,6 +179,7 @@ namespace DialogueSystem
                 // If the index is out of range, return an empty list
                 return new List<QuestionNode>();
             }
+
             int colLength = adjList.GetLength(1);
             List<QuestionNode> result = new List<QuestionNode>();
             for (int i = 0; i < colLength; i++)
@@ -146,10 +189,10 @@ namespace DialogueSystem
                     result.Add(nodes[i]);
                 }
             }
-    
+
             return result;
         }
-        
+
         internal void CloneAdjList()
         {
             int rows = adjList.GetLength(0);
@@ -164,6 +207,7 @@ namespace DialogueSystem
                     newArray[i, j] = adjList[i, j];
                 }
             }
+
             startingAdjList = newArray;
         }
     }

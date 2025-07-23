@@ -1,17 +1,20 @@
+using Newtonsoft.Json;
+
 namespace DialogueSystem
 {
     public struct Edge
     {
-        public readonly QuestionNode from;
+        public string Id { get; set; }
+        public QuestionNode from;
 
-        public readonly QuestionNode to;
+        public QuestionNode to;
         
         public Edge(QuestionNode from, QuestionNode to)
         {
+            Id = Guid.NewGuid().ToString();
             this.from = from;
             this.to = to;
         }
-
         public static bool operator ==(Edge f, Edge g)
         {
             return f.Equals(g);
@@ -22,12 +25,17 @@ namespace DialogueSystem
               return !(f == g);
         }
         
-        public bool Equals(Edge other)
+        public override bool Equals(Object other)
         {
-            return Node.Equals(this.to, other.to) && Node.Equals(this.from, other.from);
+            if(!(other is Edge))
+                return false;
+            Edge edgeOther = (Edge)other;
+            return Node.Equals(this.to, edgeOther.to) && Node.Equals(this.from, edgeOther.from);
         }
-        
-        
-        
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

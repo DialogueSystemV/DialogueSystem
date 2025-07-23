@@ -22,13 +22,23 @@ namespace DialogueSystem
         /// </summary>
         public Action? action { get; set; }
         
+        public bool enabled { get; set; }
+
+        internal QuestionNode parent;
+        
 
         public AnswerNode(string answer, int probability, bool endsConversation = false, Action action = null) : base(answer)
         {
             this.probability = probability;
             this.endsConversation = endsConversation;
             this.action = action;
+            enabled = true;
 
+        }
+
+        internal AnswerNode() : base()
+        {
+            
         }
     }
 
