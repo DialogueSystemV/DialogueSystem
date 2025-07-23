@@ -68,6 +68,7 @@ namespace DialogueSystem
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
+            EnabledAnswers = possibleAnswers.FindAll(PA => PA.enabled && (PA.condition == null || PA.condition.Invoke()));
             EnabledAnswers = possibleAnswers;
             if (EnabledAnswers.Count == 0)
             {

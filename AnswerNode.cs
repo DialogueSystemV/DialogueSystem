@@ -12,7 +12,7 @@ namespace DialogueSystem
         /// <summary>
         /// Condition that has to be met for the answer to be chosen
         /// </summary>
-        public Predicate<Ped>? condition { get; set; }
+        public ExternalCondition? condition { get; set; }
         /// <summary>
         /// Whether the answer ends the conversation abruptly
         /// </summary>

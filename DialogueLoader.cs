@@ -46,12 +46,18 @@ public class DialogueLoader
                     // Populate answers
                     foreach (JToken answerToken in answersToken)
                     {
+                        ExternalCondition con = null;
+                        string conditionString = (string)answerToken["condition"];
+                        if (conditionString != null && !string.IsNullOrEmpty(conditionString))
+                        {
+                            con = new ExternalCondition(conditionString);
+                        }
                         questionNode.possibleAnswers.Add(new AnswerNode()
                         {
                             ID = (string)answerToken["id"],
                             value = (string)answerToken["text"],
                             probability = (int)answerToken["probability"], // Handle nullable/missing
-                            // condition = (string)answerToken["condition"],
+                            condition = con,
                             endsConversation = (bool?)answerToken["endsCondition"] ?? false,
                             // action = (string)answerToken["action"] // TODO extra parsing
                         });

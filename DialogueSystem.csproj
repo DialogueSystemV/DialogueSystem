@@ -56,9 +56,11 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="AnswerNode.cs" />
+        <Compile Include="AppDomainHandler.cs" />
         <Compile Include="Conversation.cs" />
         <Compile Include="Edge.cs" />
         <Compile Include="Extensions.cs" />
+        <Compile Include="ExternalCondition.cs" />
         <Compile Include="GlobalUsings.cs" />
         <Compile Include="Graph.cs" />
         <Compile Include="GraphConfig.cs" />
