@@ -1,12 +1,14 @@
 using System.IO;
-using Newtonsoft.Json;
+using DialogueSystem.Core;
+using DialogueSystem.Core.Logic;
+using DialogueSystem.UI;
 using Newtonsoft.Json.Linq;
 using Rage;
 using RAGENativeUI;
 
-namespace DialogueSystem;
+namespace DialogueSystem.Engine;
 
-public class DialogueLoader
+internal class DialogueLoader
 {
     internal static Graph ParseGraphManually(string jsonContent)
     {
@@ -145,25 +147,5 @@ public class DialogueLoader
         var result = new Graph(nodes, edges, new GraphConfig());
         result.nodesToStartConversation = sNodes;
         return result;
-    }
-    public static Conversation LoadDialogue(string filePath, UIMenu menu)
-    {
-        if (!File.Exists(filePath))
-        {
-            throw new Exception("Dialogue file doesn't exist!");
-        }
-
-        string jsonContent;
-        try
-        {
-            jsonContent = File.ReadAllText(filePath);
-            Game.LogTrivial($"Successfully read JSON from {filePath}");
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error reading file {filePath}");
-        }
-        Graph graph = ParseGraphManually(jsonContent);
-        return new Conversation(graph, menu, graph.nodesToStartConversation);
     }
 }

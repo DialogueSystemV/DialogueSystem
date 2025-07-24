@@ -1,4 +1,4 @@
-namespace DialogueSystem
+namespace DialogueSystem.Core
 {
     public abstract class Node
     {

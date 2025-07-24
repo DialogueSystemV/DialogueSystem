@@ -1,7 +1,8 @@
-using KaimiraGames;
+using DialogueSystem.UI;
+using DialogueSystem.Util;
 using Rage;
 
-namespace DialogueSystem
+namespace DialogueSystem.Core
 {
     public class QuestionNode : Node
     {

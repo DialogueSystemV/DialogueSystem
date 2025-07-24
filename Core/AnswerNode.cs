@@ -1,6 +1,7 @@
-using Rage;
+using DialogueSystem.Core.Logic;
+using DialogueSystem.Engine;
 
-namespace DialogueSystem
+namespace DialogueSystem.Core
 {
     public class AnswerNode : Node
     {

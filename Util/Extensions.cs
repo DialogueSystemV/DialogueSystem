@@ -1,3 +1,5 @@
+using DialogueSystem.Core;
+
 namespace DialogueSystem
 {
     public static class ListExtensions

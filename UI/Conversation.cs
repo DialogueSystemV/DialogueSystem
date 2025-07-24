@@ -1,10 +1,11 @@
 using System.Threading;
-using System.Windows.Forms;
+using DialogueSystem.Core;
+using DialogueSystem.Engine;
 using Rage;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 
-namespace DialogueSystem;
+namespace DialogueSystem.UI;
 
 public class Conversation
 {
@@ -90,6 +91,7 @@ public class Conversation
             return;
         }
         conditionCancellationTokenSource = new CancellationTokenSource();
+        CancellationTokenManager.RegisterSource(conditionCancellationTokenSource);
         CancellationToken cancellationToken = conditionCancellationTokenSource.Token;
 
         conditionCheckFiber = GameFiber.StartNew(() =>

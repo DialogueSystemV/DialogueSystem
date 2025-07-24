@@ -1,19 +1,26 @@
 using System.Security.Policy;
 
-namespace DialogueSystem;
+namespace DialogueSystem.Engine;
 
 internal static class AppDomainHandler
 {
-    public static AppDomain FRDomain;
-
+    internal static AppDomain FRDomain;
     static AppDomainHandler()
     {
 	    if (FRDomain == null)
 	    {
 		    FRDomain = CreateLSPDFRAppDomain();
+		    AppDomain.CurrentDomain.DomainUnload += OnDomainUnload;
 	    }    
     }
-    
+
+    private static void OnDomainUnload(object sender, EventArgs e)
+    {
+	    if (FRDomain != null)
+	    {
+		    AppDomain.Unload(FRDomain);
+	    }
+    }
     private static AppDomain CreateLSPDFRAppDomain()
 	{
 		AppDomainSetup info = new AppDomainSetup

@@ -1,8 +1,9 @@
 using System.IO;
 using System.Reflection;
+using DialogueSystem.Engine;
 using Rage;
 
-namespace DialogueSystem;
+namespace DialogueSystem.Core.Logic;
 
 public class ExternalCondition
 {

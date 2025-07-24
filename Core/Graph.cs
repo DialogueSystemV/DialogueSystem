@@ -1,6 +1,4 @@
-using static DialogueSystem.ListExtensions;
-
-namespace DialogueSystem
+namespace DialogueSystem.Core
 {
     public class Graph
     {

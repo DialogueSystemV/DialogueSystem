@@ -1,6 +1,4 @@
-using Newtonsoft.Json;
-
-namespace DialogueSystem
+namespace DialogueSystem.Core
 {
     public struct Edge
     {

@@ -55,20 +55,22 @@
         <Reference Include="System.Xml"/>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="AnswerNode.cs" />
-        <Compile Include="AppDomainHandler.cs" />
-        <Compile Include="Conversation.cs" />
-        <Compile Include="Edge.cs" />
-        <Compile Include="Extensions.cs" />
-        <Compile Include="ExternalCondition.cs" />
+        <Compile Include="API\Loader.cs" />
+        <Compile Include="Core\AnswerNode.cs" />
+        <Compile Include="Core\Edge.cs" />
+        <Compile Include="Core\Graph.cs" />
+        <Compile Include="Core\GraphConfig.cs" />
+        <Compile Include="Core\Logic\ExternalCondition.cs" />
+        <Compile Include="Core\Node.cs" />
+        <Compile Include="Core\QuestionNode.cs" />
+        <Compile Include="Engine\AppDomainHandler.cs" />
+        <Compile Include="Engine\CancellationTokenManager.cs" />
+        <Compile Include="Engine\DialogueLoader.cs" />
         <Compile Include="GlobalUsings.cs" />
-        <Compile Include="Graph.cs" />
-        <Compile Include="GraphConfig.cs" />
-        <Compile Include="DialogueLoader.cs" />
-        <Compile Include="Node.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="QuestionNode.cs" />
-        <Compile Include="WeightedList.cs" />
+        <Compile Include="UI\Conversation.cs" />
+        <Compile Include="Util\Extensions.cs" />
+        <Compile Include="Util\WeightedList.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="packages.config" />
