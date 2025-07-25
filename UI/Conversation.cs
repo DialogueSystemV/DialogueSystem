@@ -55,13 +55,13 @@ public class Conversation
             Game.LogTrivial(
                 $"Adding all nodes({list.Count}) connected to {currNode.value} to the questionPool");
             questionPool.Clear();
-            questionPool.AddRange(list);
             if (currNode != null && !currNode.removeQuestionAfterAsked)
             {
                 Game.LogTrivial(
                     $"Adding {currNode.value} back due to removeQuestionAfterAsked being false");
                 questionPool.Add(currNode);
             }
+            questionPool.AddRange(list);
         }
 
         foreach (var item in questionPool)
