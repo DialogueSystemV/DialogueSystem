@@ -5,29 +5,27 @@ using Rage;
 
 namespace DialogueSystem.Core.Logic;
 
-public class ExternalCondition
+public class ExternalAction
 {
     public string MethodString { get; set; }
     public MethodInfo MethodInfo { get; set; }
 
-    public ExternalCondition(string str)
+    public ExternalAction(string str)
     {
         MethodString = str;
         GetMethodInfo();
     }
 
-    public bool Invoke()
+    public void Invoke()
     {
         try
         {
-            return (bool)MethodInfo.Invoke(null, Array.Empty<object>());
+            MethodInfo.Invoke(null, Array.Empty<object>());
         }
         catch (Exception ex)
         {
             Game.LogTrivial($"Failed to call {MethodString}: {ex.Message}");
         }
-
-        return false;
     }
 
     private void GetMethodInfo()
@@ -86,7 +84,7 @@ public class ExternalCondition
 
         MethodInfo methodInfo = type.GetMethods(BindingFlags.Static | BindingFlags.Public)
             .FirstOrDefault(m => m.Name.Equals(methodName, StringComparison.OrdinalIgnoreCase) &&
-                                 m.GetParameters().Length == 0 && m.ReturnType == typeof(bool));
+                                 m.GetParameters().Length == 0 && m.ReturnType == typeof(void));
 
         if (methodInfo == null)
         {

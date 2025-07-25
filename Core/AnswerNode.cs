@@ -21,18 +21,17 @@ namespace DialogueSystem.Core
         /// <summary>
         /// Method that gets run when the answer gets chosen
         /// </summary>
-        public Action? action { get; set; }
+        public ExternalAction? action { get; set; }
         
         public bool enabled { get; set; }
 
         internal QuestionNode parent;
         
 
-        public AnswerNode(string answer, int probability, bool endsConversation = false, Action action = null) : base(answer)
+        public AnswerNode(string answer, int probability, bool endsConversation = false) : base(answer)
         {
             this.probability = probability;
             this.endsConversation = endsConversation;
-            this.action = action;
             enabled = true;
 
         }

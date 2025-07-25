@@ -130,6 +130,7 @@ public class Conversation
         {
             Game.LogTrivial("Requesting condition check fiber to stop...");
             conditionCancellationTokenSource.Cancel();
+            conditionPool.Clear();
         }
         else if (conditionCheckFiber == null || !conditionCheckFiber.IsAlive)
         {
@@ -185,7 +186,7 @@ public class Conversation
         Game.LogTrivial($"Answer chosen: {answer.value}");
         OnQuestionSelect?.Invoke(this, (qNode, answer));
         Game.DisplaySubtitle(answer.value);
-        if (answer.action != null) answer.action();
+        if (answer.action != null) answer.action.Invoke();
         if (answer.endsConversation)
         {
             EndConvo();

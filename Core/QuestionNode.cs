@@ -104,7 +104,9 @@ namespace DialogueSystem.Core
 
             // If not in cache (should ideally not happen if conditions are pre-computed),
             // invoke the condition directly as a fallback.
-            return answerNode.condition.Invoke();
+            bool val = answerNode.condition.Invoke();
+            convo.conditionPool.Add(answerNode.ID, val);
+            return val;
         }
 
         /// <summary>

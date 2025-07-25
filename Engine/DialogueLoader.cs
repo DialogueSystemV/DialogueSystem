@@ -15,7 +15,7 @@ internal class DialogueLoader
         var nodes = new List<QuestionNode>();
         var edges = new List<Edge>();
         var sNodes = new List<QuestionNode>();
-        
+
 
         JObject rootJObject = JObject.Parse(jsonContent);
 
@@ -31,7 +31,7 @@ internal class DialogueLoader
                 QuestionNode node;
                 JToken dataToken = nodeToken["data"];
                 JToken answersToken = dataToken?["answers"];
-                
+
                 string id = (string)nodeToken["id"];
                 string qText = (string)dataToken["questionText"];
                 bool removeQuestionAfterAsked = (bool)nodeToken["removeQuestionAfterAsked"];
@@ -54,14 +54,23 @@ internal class DialogueLoader
                         {
                             con = new ExternalCondition(conditionString);
                         }
+
+                        ExternalAction act = null;
+                        string actionString = (string)answerToken["condition"];
+                        if (actionString != null && !string.IsNullOrEmpty(actionString))
+                        {
+                            act = new ExternalAction(actionString);
+                        }
+
                         questionNode.possibleAnswers.Add(new AnswerNode()
                         {
                             ID = (string)answerToken["id"],
                             value = (string)answerToken["text"],
-                            probability = (int)answerToken["probability"], // Handle nullable/missing
+                            probability =
+                                (int)answerToken["probability"],
                             condition = con,
                             endsConversation = (bool?)answerToken["endsCondition"] ?? false,
-                            // action = (string)answerToken["action"] // TODO extra parsing
+                            action = act 
                         });
                     }
 
@@ -83,19 +92,21 @@ internal class DialogueLoader
                 node.ID = id;
                 node.value = qText;
                 node.removeQuestionAfterAsked = removeQuestionAfterAsked;
-                node.startsConversation = startsConversation; 
+                node.startsConversation = startsConversation;
 
                 nodes.Add(node); // Add to the final list
                 if (node.startsConversation)
                 {
                     sNodes.Add(node);
                 }
+
                 if (nodeLookup.ContainsKey(id)) // Add to lookup dictionary
                 {
                     Console.WriteLine(
                         $"Error: Duplicate Node ID found while parsing: {node.ID}. Only the first instance will be used for connections.");
                     // You might want to skip adding the duplicate or handle it differently
                 }
+
                 nodeLookup.Add(id, node);
             }
         }

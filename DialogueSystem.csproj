@@ -60,6 +60,7 @@
         <Compile Include="Core\Edge.cs" />
         <Compile Include="Core\Graph.cs" />
         <Compile Include="Core\GraphConfig.cs" />
+        <Compile Include="Core\Logic\ExternalAction.cs" />
         <Compile Include="Core\Logic\ExternalCondition.cs" />
         <Compile Include="Core\Node.cs" />
         <Compile Include="Core\QuestionNode.cs" />
