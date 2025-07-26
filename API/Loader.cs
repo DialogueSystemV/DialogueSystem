@@ -11,6 +11,7 @@ public static class Loader
 {
     public static Conversation LoadDialogue(string filePath, UIMenu menu)
     {
+        filePath = Path.Combine("Plugins/DialogueSystem", filePath);
         if (!File.Exists(filePath))
         {
             throw new Exception("Dialogue file doesn't exist!");

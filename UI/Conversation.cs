@@ -205,12 +205,11 @@ public class Conversation
     private void EndConvo()
     {
         Game.LogTrivial("Ending Conversation");
-        convoMenu.Close();
+        OnCoversationEnded?.Invoke(this, EventArgs.Empty);
         foreach (QuestionNode q in graph.nodes)
         {
             q.ResetChosenAnswer();
         }
-
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
@@ -218,6 +217,5 @@ public class Conversation
         convoMenu.OnMenuClose -= StopCheckingConditions;
         convoStarted = false;
         currNode = null;
-        OnCoversationEnded?.Invoke(this, EventArgs.Empty);
     }
 }
