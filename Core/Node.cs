@@ -34,20 +34,14 @@ namespace DialogueSystem.Core
             {
                 if (this is AnswerNode)
                 {
-                    var answerNode = (AnswerNode)this;
-                    graph.AddEdge(new Edge(answerNode.parent, qNode));
+                    var node = this as AnswerNode;
+                    graph.AddEdge(new Edge(node.parent, qNode));
                 }
-                graph.AddEdge(new Edge((QuestionNode)this, qNode));
             }
             
             foreach(var qNode in questionsToRemove)
             {
-                if (this is AnswerNode)
-                {
-                    var answerNode = (AnswerNode)this;
-                    graph.RemoveEdge(new Edge(answerNode.parent, qNode));
-                }
-                graph.RemoveEdge(new Edge((QuestionNode)this, qNode));
+                graph.RemoveAllLinksFromQuestion(qNode);
             }
 
             foreach (var aNode in answersToAdd)
