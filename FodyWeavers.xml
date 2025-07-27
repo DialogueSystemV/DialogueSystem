@@ -2,7 +2,6 @@
   <Costura>
     <IncludeAssemblies>
       Newtonsoft.Json
-      RAGENativeUI
       Costura
     </IncludeAssemblies>
   </Costura>
