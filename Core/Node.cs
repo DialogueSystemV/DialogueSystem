@@ -30,29 +30,6 @@ namespace DialogueSystem.Core
 
         public virtual void ProcessEdit(Graph graph)
         {
-            foreach (var qNode in questionsToAdd)
-            {
-                if (this is AnswerNode)
-                {
-                    var node = this as AnswerNode;
-                    graph.AddEdge(new Edge(node.parent, qNode));
-                }
-            }
-            
-            foreach(var qNode in questionsToRemove)
-            {
-                graph.RemoveAllLinksFromQuestion(qNode);
-            }
-
-            foreach (var aNode in answersToAdd)
-            {
-                aNode.enabled = true;
-            }
-            
-            foreach (var aNode in answersToRemove)
-            {
-                aNode.enabled = false;
-            }
         }
     }
 }

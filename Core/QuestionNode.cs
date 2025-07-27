@@ -119,7 +119,6 @@ namespace DialogueSystem.Core
             {
                 graph.RemoveAllLinksFromQuestion(this);
             }
-
             base.ProcessEdit(graph);
         }
 
