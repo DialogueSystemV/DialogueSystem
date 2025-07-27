@@ -1,9 +1,11 @@
-using System.Windows.Forms;
+using System.Threading;
+using DialogueSystem.Core;
+using DialogueSystem.Engine;
 using Rage;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
 
-namespace DialogueSystem;
+namespace DialogueSystem.UI;
 
 public class Conversation
 {
@@ -15,6 +17,10 @@ public class Conversation
     public event EventHandler<(QuestionNode, AnswerNode)> OnQuestionSelect;
     public event EventHandler OnCoversationEnded;
     private GameFiber onItemSelectFiber;
+    private GameFiber conditionCheckFiber;
+    internal Dictionary<string, bool> conditionPool;
+    private CancellationTokenSource conditionCancellationTokenSource;
+
 
     public Conversation(Graph graph, UIMenu convoMenu, List<QuestionNode> startNodes)
     {
@@ -24,6 +30,7 @@ public class Conversation
         this.convoMenu = convoMenu;
         questionPool = new List<QuestionNode>();
         questionPool.AddRange(startNodes);
+        conditionPool = new Dictionary<string, bool>();
     }
 
     /// <summary>
@@ -48,13 +55,13 @@ public class Conversation
             Game.LogTrivial(
                 $"Adding all nodes({list.Count}) connected to {currNode.value} to the questionPool");
             questionPool.Clear();
-            questionPool.AddRange(list);
             if (currNode != null && !currNode.removeQuestionAfterAsked)
             {
                 Game.LogTrivial(
                     $"Adding {currNode.value} back due to removeQuestionAfterAsked being false");
                 questionPool.Add(currNode);
             }
+            questionPool.AddRange(list);
         }
 
         foreach (var item in questionPool)
@@ -71,7 +78,85 @@ public class Conversation
     public void Run()
     {
         convoMenu.OnItemSelect += ItemSelectWarapper;
-        Game.LogTrivial("Subbing to event");
+        convoMenu.OnMenuOpen += StartCheckingConditions;
+        convoMenu.OnMenuClose += StopCheckingConditions;
+        Game.LogTrivial("Subbing to events");
+    }
+
+    private void StartCheckingConditions(UIMenu sender)
+    {
+        if (conditionCheckFiber != null && conditionCheckFiber.IsAlive)
+        {
+            Game.LogTrivial("Condition checking fiber already running.");
+            return;
+        }
+        conditionCancellationTokenSource = new CancellationTokenSource();
+        CancellationTokenManager.RegisterSource(conditionCancellationTokenSource);
+        CancellationToken cancellationToken = conditionCancellationTokenSource.Token;
+
+        conditionCheckFiber = GameFiber.StartNew(() =>
+        {
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    CheckConditions();
+                    GameFiber.Yield();
+                    GameFiber.Sleep(1500);
+                }
+            }
+            catch (ThreadAbortException)
+            {
+                Game.LogTrivial("Condition check fiber aborted (unexpectedly).");
+            }
+            catch (Exception ex)
+            {
+                Game.LogTrivial($"Error in condition check fiber: {ex}");
+            }
+            finally
+            {
+                Game.LogTrivial("Condition check fiber stopped.");
+                conditionCancellationTokenSource?.Dispose();
+                conditionCancellationTokenSource = null;
+            }
+        });
+        Game.LogTrivial("Condition checking fiber started.");
+    }
+
+    private void StopCheckingConditions(UIMenu sender)
+    {
+        if (conditionCancellationTokenSource != null &&
+            !conditionCancellationTokenSource.IsCancellationRequested)
+        {
+            Game.LogTrivial("Requesting condition check fiber to stop...");
+            conditionCancellationTokenSource.Cancel();
+            conditionPool.Clear();
+        }
+        else if (conditionCheckFiber == null || !conditionCheckFiber.IsAlive)
+        {
+            Game.LogTrivial("Condition checking fiber is not running or already stopped.");
+        }
+    }
+
+    private void CheckConditions()
+    {
+        foreach (var qNode in questionPool)
+        {
+            foreach (var aNode in qNode.possibleAnswers)
+            {
+                if (aNode.condition != null)
+                {
+                    if (conditionPool.ContainsKey(aNode.ID))
+                    {
+                        conditionPool[aNode.ID] = aNode.condition.Invoke();
+                    }
+                    else
+                    {
+                        conditionPool.Add(aNode.ID, aNode.condition.Invoke());
+                    }
+                }
+            }
+        }
     }
 
     private void ItemSelectWarapper(UIMenu uiMenu, UIMenuItem selectedItem, int index)
@@ -96,12 +181,12 @@ public class Conversation
         QuestionNode qNode = questionPool[index];
         currNode = qNode;
         Game.DisplaySubtitle(qNode.value);
-        answer = qNode.ChooseQuestion(graph);
+        answer = qNode.ChooseQuestion(graph, this);
         Game.LogTrivial($"Question chosen: {qNode.value}");
         Game.LogTrivial($"Answer chosen: {answer.value}");
         OnQuestionSelect?.Invoke(this, (qNode, answer));
         Game.DisplaySubtitle(answer.value);
-        if (answer.action != null) answer.action();
+        if (answer.action != null) answer.action.Invoke();
         if (answer.endsConversation)
         {
             EndConvo();
@@ -120,17 +205,17 @@ public class Conversation
     private void EndConvo()
     {
         Game.LogTrivial("Ending Conversation");
-        convoMenu.Close();
+        OnCoversationEnded?.Invoke(this, EventArgs.Empty);
         foreach (QuestionNode q in graph.nodes)
         {
             q.ResetChosenAnswer();
         }
-
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
+        convoMenu.OnMenuOpen -= StartCheckingConditions;
+        convoMenu.OnMenuClose -= StopCheckingConditions;
         convoStarted = false;
         currNode = null;
-        OnCoversationEnded?.Invoke(this, EventArgs.Empty);
     }
 }

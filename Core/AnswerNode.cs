@@ -1,6 +1,7 @@
-using Rage;
+using DialogueSystem.Core.Logic;
+using DialogueSystem.Engine;
 
-namespace DialogueSystem
+namespace DialogueSystem.Core
 {
     public class AnswerNode : Node
     {
@@ -8,38 +9,51 @@ namespace DialogueSystem
         /// Probability the answer gets chosen
         /// </summary>
         public int probability { get; set; }
-        
+
         /// <summary>
         /// Condition that has to be met for the answer to be chosen
         /// </summary>
-        public Predicate<Ped>? condition { get; set; }
+        public ExternalCondition? condition { get; set; }
+
         /// <summary>
         /// Whether the answer ends the conversation abruptly
         /// </summary>
         public bool endsConversation { get; set; }
+
         /// <summary>
         /// Method that gets run when the answer gets chosen
         /// </summary>
-        public Action? action { get; set; }
-        
+        public ExternalAction? action { get; set; }
+
         public bool enabled { get; set; }
 
         internal QuestionNode parent;
-        
 
-        public AnswerNode(string answer, int probability, bool endsConversation = false, Action action = null) : base(answer)
+
+        public AnswerNode(string answer, int probability, bool endsConversation = false) :
+            base(answer)
         {
             this.probability = probability;
             this.endsConversation = endsConversation;
-            this.action = action;
             enabled = true;
-
         }
 
         internal AnswerNode() : base()
         {
-            
+        }
+
+        public override void ProcessEdit(Graph graph)
+        {
+            foreach (var qNode in questionsToAdd)
+            {
+                graph.AddEdge(new Edge(parent, qNode));
+            }
+
+            foreach (var qNode in questionsToRemove)
+            {
+                graph.RemoveAllLinksFromQuestion(qNode);
+            }
+            base.ProcessEdit(graph);
         }
     }
-
 }

@@ -1,25 +1,28 @@
 using System.IO;
-using Newtonsoft.Json;
+using DialogueSystem.Core;
+using DialogueSystem.Core.Logic;
+using DialogueSystem.UI;
 using Newtonsoft.Json.Linq;
 using Rage;
 using RAGENativeUI;
 
-namespace DialogueSystem;
+namespace DialogueSystem.Engine;
 
-public class DialogueLoader
+internal class DialogueLoader
 {
     internal static Graph ParseGraphManually(string jsonContent)
     {
         var nodes = new List<QuestionNode>();
         var edges = new List<Edge>();
         var sNodes = new List<QuestionNode>();
-        
+
 
         JObject rootJObject = JObject.Parse(jsonContent);
 
         // --- Phase 1: Parse Nodes and build a lookup dictionary ---
         JArray nodesJsonArray = (JArray)rootJObject["nodes"];
-        Dictionary<string, QuestionNode> nodeLookup = new Dictionary<string, QuestionNode>();
+        Dictionary<string, QuestionNode> questionLookup = new Dictionary<string, QuestionNode>();
+        Dictionary<string, AnswerNode> answerLookup = new Dictionary<string, AnswerNode>();
 
         if (nodesJsonArray != null)
         {
@@ -29,7 +32,7 @@ public class DialogueLoader
                 QuestionNode node;
                 JToken dataToken = nodeToken["data"];
                 JToken answersToken = dataToken?["answers"];
-                
+
                 string id = (string)nodeToken["id"];
                 string qText = (string)dataToken["questionText"];
                 bool removeQuestionAfterAsked = (bool)nodeToken["removeQuestionAfterAsked"];
@@ -46,15 +49,32 @@ public class DialogueLoader
                     // Populate answers
                     foreach (JToken answerToken in answersToken)
                     {
-                        questionNode.possibleAnswers.Add(new AnswerNode()
+                        ExternalCondition con = null;
+                        string conditionString = (string)answerToken["condition"];
+                        if (conditionString != null && !string.IsNullOrEmpty(conditionString))
+                        {
+                            con = new ExternalCondition(conditionString);
+                        }
+
+                        ExternalAction act = null;
+                        string actionString = (string)answerToken["action"];
+                        if (actionString != null && !string.IsNullOrEmpty(actionString))
+                        {
+                            act = new ExternalAction(actionString);
+                        }
+
+                        var aNode = new AnswerNode()
                         {
                             ID = (string)answerToken["id"],
                             value = (string)answerToken["text"],
-                            probability = (int)answerToken["probability"], // Handle nullable/missing
-                            // condition = (string)answerToken["condition"],
+                            probability =
+                                (int)answerToken["probability"],
+                            condition = con,
                             endsConversation = (bool?)answerToken["endsCondition"] ?? false,
-                            // action = (string)answerToken["action"] // TODO extra parsing
-                        });
+                            action = act
+                        };
+                        questionNode.possibleAnswers.Add(aNode);
+                        answerLookup.Add((string)answerToken["id"], aNode);
                     }
 
                     node = questionNode;
@@ -75,20 +95,22 @@ public class DialogueLoader
                 node.ID = id;
                 node.value = qText;
                 node.removeQuestionAfterAsked = removeQuestionAfterAsked;
-                node.startsConversation = startsConversation; 
+                node.startsConversation = startsConversation;
 
                 nodes.Add(node); // Add to the final list
                 if (node.startsConversation)
                 {
                     sNodes.Add(node);
                 }
-                if (nodeLookup.ContainsKey(id)) // Add to lookup dictionary
+
+                if (questionLookup.ContainsKey(id)) // Add to lookup dictionary
                 {
                     Console.WriteLine(
                         $"Error: Duplicate Node ID found while parsing: {node.ID}. Only the first instance will be used for connections.");
                     // You might want to skip adding the duplicate or handle it differently
                 }
-                nodeLookup.Add(id, node);
+
+                questionLookup.Add(id, node);
             }
         }
 
@@ -108,7 +130,7 @@ public class DialogueLoader
 
                 // Lookup 'From' node
                 if (!string.IsNullOrEmpty(fromNodeId) &&
-                    nodeLookup.TryGetValue(fromNodeId, out QuestionNode foundFromNode))
+                    questionLookup.TryGetValue(fromNodeId, out QuestionNode foundFromNode))
                 {
                     fromNode = foundFromNode;
                 }
@@ -120,7 +142,7 @@ public class DialogueLoader
 
                 // Lookup 'To' node
                 if (!string.IsNullOrEmpty(toNodeId) &&
-                    nodeLookup.TryGetValue(toNodeId, out QuestionNode foundToNode))
+                    questionLookup.TryGetValue(toNodeId, out QuestionNode foundToNode))
                 {
                     toNode = foundToNode;
                 }
@@ -136,28 +158,76 @@ public class DialogueLoader
             }
         }
 
+        JArray consequencesJsonArray = (JArray)rootJObject["consequences"];
+        foreach (JToken entry in consequencesJsonArray)
+        {
+            JToken innerEntry = entry["consequences"];
+            if (innerEntry != null && innerEntry.Type == JTokenType.Object)
+            {
+                var aNodeID = (string)innerEntry["answerNodeId"];
+                AnswerNode answerNode = null;
+                if (!string.IsNullOrEmpty(aNodeID) &&
+                    answerLookup.TryGetValue(aNodeID, out AnswerNode a))
+                {
+                    answerNode = a;
+                }
+                else
+                {
+                    Console.WriteLine(
+                        $"Warning: Answer Node {aNodeID}' not found.");
+                    continue;
+                }
+
+                var questionsToAddArray = (JArray)innerEntry["questionsToAdd"];
+                if (questionsToAddArray != null)
+                {
+                    foreach (JToken qIdToken in questionsToAddArray)
+                    {
+                        if (qIdToken.Type == JTokenType.String)
+                        {
+                            var idString = (string)qIdToken;
+                            if (!string.IsNullOrEmpty(idString) &&
+                                questionLookup.TryGetValue(idString, out QuestionNode question))
+                            {
+                                answerNode.questionsToAdd.Add(question);
+                            }
+                            else
+                            {
+                                Console.WriteLine(
+                                    $"Warning: Question Node {idString}' not found.");
+                                continue;
+                            }
+                        }
+                    }
+                }
+                
+                var questionsToRemoveArray = (JArray)innerEntry["questionsToRemove"];
+                if (questionsToRemoveArray != null)
+                {
+                    foreach (JToken qIdToken in questionsToRemoveArray)
+                    {
+                        if (qIdToken.Type == JTokenType.String)
+                        {
+                            var idString = (string)qIdToken;
+                            if (!string.IsNullOrEmpty(idString) &&
+                                questionLookup.TryGetValue(idString, out QuestionNode question))
+                            {
+                                answerNode.questionsToRemove.Add(question);
+                            }
+                            else
+                            {
+                                Console.WriteLine(
+                                    $"Warning: Question Node {idString}' not found.");
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         var result = new Graph(nodes, edges, new GraphConfig());
         result.nodesToStartConversation = sNodes;
         return result;
-    }
-    public static Conversation LoadDialogue(string filePath, UIMenu menu)
-    {
-        if (!File.Exists(filePath))
-        {
-            throw new Exception("Dialogue file doesn't exist!");
-        }
-
-        string jsonContent;
-        try
-        {
-            jsonContent = File.ReadAllText(filePath);
-            Game.LogTrivial($"Successfully read JSON from {filePath}");
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error reading file {filePath}");
-        }
-        Graph graph = ParseGraphManually(jsonContent);
-        return new Conversation(graph, menu, graph.nodesToStartConversation);
     }
 }
