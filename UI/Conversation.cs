@@ -15,7 +15,7 @@ public class Conversation
     public UIMenu convoMenu;
     private List<QuestionNode> questionPool;
     public event EventHandler<(QuestionNode, AnswerNode)> OnQuestionSelect;
-    public event EventHandler OnCoversationEnded;
+    public event EventHandler OnConversationEnded;
     private GameFiber onItemSelectFiber;
     private GameFiber conditionCheckFiber;
     internal Dictionary<string, bool> conditionPool;
@@ -205,7 +205,7 @@ public class Conversation
     private void EndConvo()
     {
         Game.LogTrivial("Ending Conversation");
-        OnCoversationEnded?.Invoke(this, EventArgs.Empty);
+        OnConversationEnded?.Invoke(this, EventArgs.Empty);
         foreach (QuestionNode q in graph.nodes)
         {
             q.ResetChosenAnswer();
