@@ -14,22 +14,4 @@ namespace DialogueSystem
             }
         }
     }
-
-    public class NoValidAnswerException : Exception
-    {
-        public NoValidAnswerException()
-        {
-
-        }
-
-        public NoValidAnswerException(string message)
-            : base(message)
-        {
-        }
-
-        public NoValidAnswerException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-    }
 }

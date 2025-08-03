@@ -69,12 +69,18 @@ namespace DialogueSystem.Core
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            EnabledAnswers =
-                possibleAnswers.FindAll(PA => PA.enabled && IsAnswerConditionMet(PA, convo));
-            EnabledAnswers = possibleAnswers;
+            Game.LogTrivial("Checking all answers and if the condition is true or false");
+            foreach (AnswerNode answer in possibleAnswers)
+            {
+                if (IsAnswerConditionMet(answer, convo))
+                {
+                    EnabledAnswers.Add(answer);
+                }
+            }
+
             if (EnabledAnswers.Count == 0)
             {
-                throw new NoValidAnswerException($"No Valid Answer for Question Node: {value}");
+                throw new ArgumentException($"No Valid Answer for Question Node: {value}");
             }
 
             _weightedAnswers = new WeightedList<AnswerNode>(rndm);
@@ -93,19 +99,12 @@ namespace DialogueSystem.Core
             // If there's no condition, it's always met
             if (answerNode.condition == null)
             {
+                Game.LogTrivial($"{answerNode.condition} was null and defaulted to true.");
+
                 return true;
             }
-
-            // Try to get the cached result from the condition pool
-            if (convo.conditionPool.TryGetValue(answerNode.ID, out bool cachedConditionResult))
-            {
-                return cachedConditionResult;
-            }
-
-            // If not in cache (should ideally not happen if conditions are pre-computed),
-            // invoke the condition directly as a fallback.
             bool val = answerNode.condition.Invoke();
-            convo.conditionPool.Add(answerNode.ID, val);
+            Game.LogTrivial($"{answerNode.condition} was {val}");
             return val;
         }
 
@@ -119,6 +118,7 @@ namespace DialogueSystem.Core
             {
                 graph.RemoveAllLinksFromQuestion(this);
             }
+
             base.ProcessEdit(graph);
         }
 
