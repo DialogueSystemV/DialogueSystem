@@ -40,6 +40,8 @@ namespace DialogueSystem.Core
 
         internal AnswerNode() : base()
         {
+            questionsToAdd = new HashSet<QuestionNode>();
+            questionsToRemove = new HashSet<QuestionNode>();
         }
 
         public override void ProcessEdit(Graph graph)

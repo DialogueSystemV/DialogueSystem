@@ -6,7 +6,7 @@ namespace DialogueSystem.Core
         public string value { get; set; }
         public HashSet<QuestionNode> questionsToRemove { get; set; }
         public HashSet<QuestionNode> questionsToAdd { get; set; }
-        
+
         public HashSet<AnswerNode> answersToRemove { get; set; }
         public HashSet<AnswerNode> answersToAdd { get; set; }
 
@@ -14,13 +14,10 @@ namespace DialogueSystem.Core
         {
             this.value = Value;
             ID = Guid.NewGuid().ToString();
-            questionsToAdd = new HashSet<QuestionNode>();
-            questionsToRemove = new HashSet<QuestionNode>();
         }
 
         protected Node()
         {
-            
         }
 
         static bool Equals(Node n1, Node n2)
