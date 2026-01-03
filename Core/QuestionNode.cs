@@ -53,7 +53,7 @@ namespace DialogueSystem.Core
         public AnswerNode ChooseQuestion(Graph graph, Conversation convo)
         {
             AnswerNode node = ChooseAnswer(graph, convo);
-            if (chosenAnswer == null)
+            if (chosenAnswer != null)
             {
                 ProcessEdit(graph);
                 node.ProcessEdit(graph);
