@@ -5,6 +5,7 @@ using DialogueSystem.UI;
 using Newtonsoft.Json.Linq;
 using Rage;
 using RAGENativeUI;
+using DialogueSystem.Logging;
 
 namespace DialogueSystem.Engine;
 
@@ -71,7 +72,8 @@ internal class DialogueLoader
                                 (int)answerToken["probability"],
                             condition = con,
                             endsConversation = (bool?)answerToken["endsCondition"] ?? false,
-                            action = act
+                            action = act,
+                            parent = questionNode
                         };
                         questionNode.possibleAnswers.Add(aNode);
                         answerLookup.Add((string)answerToken["id"], aNode);
@@ -85,7 +87,7 @@ internal class DialogueLoader
                     // For now, if it's not a QuestionNode based on 'answers',
                     // we'll assume it's just a generic Node (if you had a concrete base)
                     // or throw an error if all must be QuestionNodes.
-                    Console.WriteLine(
+                    Logger.logger.Log(
                         $"Warning: Node ID '{id}' does not appear to be a QuestionNode. Skipping specific data population.");
                     node =
                         new QuestionNode(); // Default to QuestionNode for now or make a GenericNode
@@ -105,7 +107,7 @@ internal class DialogueLoader
 
                 if (questionLookup.ContainsKey(id)) // Add to lookup dictionary
                 {
-                    Console.WriteLine(
+                    Logger.logger.Log(
                         $"Error: Duplicate Node ID found while parsing: {node.ID}. Only the first instance will be used for connections.");
                     // You might want to skip adding the duplicate or handle it differently
                 }
@@ -136,7 +138,7 @@ internal class DialogueLoader
                 }
                 else
                 {
-                    Console.WriteLine(
+                    Logger.logger.Log(
                         $"Warning: 'From' node with ID '{fromNodeId}' not found for edge '{edgeId}'.");
                 }
 
@@ -148,12 +150,12 @@ internal class DialogueLoader
                 }
                 else
                 {
-                    Console.WriteLine(
+                    Logger.logger.Log(
                         $"Warning: 'To' node with ID '{toNodeId}' not found for edge '{edgeId}'.");
                 }
 
                 // Create and add the Edge object
-                Game.LogTrivial($"adding edge from {fromNode.value} to {toNode.value}");
+                Logger.logger.Log($"adding edge from {fromNode.value} to {toNode.value}");
                 edges.Add(new Edge(fromNode, toNode));
             }
         }
@@ -171,9 +173,9 @@ internal class DialogueLoader
                 {
                     answerNode = a;
                 }
-                else
+                else if(!string.IsNullOrEmpty(aNodeID))
                 {
-                    Console.WriteLine(
+                    Logger.logger.Log(
                         $"Warning: Answer Node {aNodeID}' not found.");
                     continue;
                 }
@@ -191,9 +193,9 @@ internal class DialogueLoader
                             {
                                 answerNode.questionsToAdd.Add(question);
                             }
-                            else
+                            else if(!string.IsNullOrEmpty(aNodeID))
                             {
-                                Console.WriteLine(
+                                Logger.logger.Log(
                                     $"Warning: Question Node {idString}' not found.");
                                 continue;
                             }
@@ -214,10 +216,10 @@ internal class DialogueLoader
                             {
                                 answerNode.questionsToRemove.Add(question);
                             }
-                            else
+                            else if(!string.IsNullOrEmpty(aNodeID))
                             {
-                                Console.WriteLine(
-                                    $"Warning: Question Node {idString}' not found.");
+                                Logger.logger.Log(
+                                        $"Warning: Question Node {idString}' not found.");
                                 continue;
                             }
                         }

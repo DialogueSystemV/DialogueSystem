@@ -4,6 +4,7 @@ using DialogueSystem.Engine;
 using Rage;
 using RAGENativeUI;
 using RAGENativeUI.Elements;
+using DialogueSystem.Logging;
 
 namespace DialogueSystem.UI;
 
@@ -52,12 +53,12 @@ public class Conversation
         if (!start)
         {
             var list = graph.GetConnectedNodes(currNode);
-            Game.LogTrivial(
+            Logger.logger.Log(
                 $"Adding all nodes({list.Count}) connected to {currNode.value} to the questionPool");
             questionPool.Clear();
             if (currNode != null && !currNode.removeQuestionAfterAsked)
             {
-                Game.LogTrivial(
+                Logger.logger.Log(
                     $"Adding {currNode.value} back due to removeQuestionAfterAsked being false");
                 questionPool.Add(currNode);
             }
@@ -66,7 +67,7 @@ public class Conversation
 
         foreach (var item in questionPool)
         {
-            Game.LogTrivial($"Adding {item.value} to the menu");
+            Logger.logger.Log($"Adding {item.value} to the menu");
             convoMenu.AddItem(new UIMenuItem(item.value));
         }
     }
@@ -78,16 +79,14 @@ public class Conversation
     public void Run()
     {
         convoMenu.OnItemSelect += ItemSelectWarapper;
-        convoMenu.OnMenuOpen += StartCheckingConditions;
-        convoMenu.OnMenuClose += StopCheckingConditions;
-        Game.LogTrivial("Subbing to events");
+        Logger.logger.Log("Subbing to events");
     }
 
     private void StartCheckingConditions(UIMenu sender)
     {
         if (conditionCheckFiber != null && conditionCheckFiber.IsAlive)
         {
-            Game.LogTrivial("Condition checking fiber already running.");
+            Logger.logger.Log("Condition checking fiber already running.");
             return;
         }
         conditionCancellationTokenSource = new CancellationTokenSource();
@@ -107,20 +106,20 @@ public class Conversation
             }
             catch (ThreadAbortException)
             {
-                Game.LogTrivial("Condition check fiber aborted (unexpectedly).");
+                Logger.logger.Log("Condition check fiber aborted (unexpectedly).");
             }
             catch (Exception ex)
             {
-                Game.LogTrivial($"Error in condition check fiber: {ex}");
+                Logger.logger.Log($"Error in condition check fiber: {ex}");
             }
             finally
             {
-                Game.LogTrivial("Condition check fiber stopped.");
+                Logger.logger.Log("Condition check fiber stopped.");
                 conditionCancellationTokenSource?.Dispose();
                 conditionCancellationTokenSource = null;
             }
         });
-        Game.LogTrivial("Condition checking fiber started.");
+        Logger.logger.Log("Condition checking fiber started.");
     }
 
     private void StopCheckingConditions(UIMenu sender)
@@ -128,13 +127,13 @@ public class Conversation
         if (conditionCancellationTokenSource != null &&
             !conditionCancellationTokenSource.IsCancellationRequested)
         {
-            Game.LogTrivial("Requesting condition check fiber to stop...");
+            Logger.logger.Log("Requesting condition check fiber to stop...");
             conditionCancellationTokenSource.Cancel();
             conditionPool.Clear();
         }
         else if (conditionCheckFiber == null || !conditionCheckFiber.IsAlive)
         {
-            Game.LogTrivial("Condition checking fiber is not running or already stopped.");
+            Logger.logger.Log("Condition checking fiber is not running or already stopped.");
         }
     }
 
@@ -170,20 +169,20 @@ public class Conversation
         }
         else
         {
-            Game.LogTrivial("Item selection ignored: Another fiber is already processing.");
+            Logger.logger.Log("Item selection ignored: Another fiber is already processing.");
         }
     }
 
     private void OnItemSelect(UIMenu uiMenu, UIMenuItem selectedItem, int index)
     {
-        Game.LogTrivial("In Dialogue System item select");
+        Logger.logger.Log("In Dialogue System item select");
         AnswerNode answer = null;
         QuestionNode qNode = questionPool[index];
         currNode = qNode;
         Game.DisplaySubtitle(qNode.value);
         answer = qNode.ChooseQuestion(graph, this);
-        Game.LogTrivial($"Question chosen: {qNode.value}");
-        Game.LogTrivial($"Answer chosen: {answer.value}");
+        Logger.logger.Log($"Question chosen: {qNode.value}");
+        Logger.logger.Log($"Answer chosen: {answer.value}");
         OnQuestionSelect?.Invoke(this, (qNode, answer));
         Game.DisplaySubtitle(answer.value);
         if (answer.action != null) answer.action.Invoke();
@@ -204,7 +203,7 @@ public class Conversation
 
     private void EndConvo()
     {
-        Game.LogTrivial("Ending Conversation");
+        Logger.logger.Log("Ending Conversation");
         OnConversationEnded?.Invoke(this, EventArgs.Empty);
         foreach (QuestionNode q in graph.nodes)
         {
@@ -213,8 +212,6 @@ public class Conversation
         graph.edges = graph.startingEdges;
         graph.adjList = graph.startingAdjList;
         convoMenu.OnItemSelect -= OnItemSelect;
-        convoMenu.OnMenuOpen -= StartCheckingConditions;
-        convoMenu.OnMenuClose -= StopCheckingConditions;
         convoStarted = false;
         currNode = null;
     }

@@ -1,6 +1,7 @@
 using DialogueSystem.UI;
 using DialogueSystem.Util;
 using Rage;
+using DialogueSystem.Logging;
 
 namespace DialogueSystem.Core
 {
@@ -59,7 +60,7 @@ namespace DialogueSystem.Core
                 node.ProcessEdit(graph);
             }
 
-            Game.LogTrivial($"Setting {node.value} to the answer of {value}");
+            Logger.logger.Log($"Setting {node.value} to the answer of {value}");
             chosenAnswer = node;
             return node;
         }
@@ -69,7 +70,7 @@ namespace DialogueSystem.Core
         {
             if (chosenAnswer != null) return chosenAnswer;
             List<AnswerNode> EnabledAnswers = new List<AnswerNode>();
-            Game.LogTrivial("Checking all answers and if the condition is true or false");
+            Logger.logger.Log("Checking all answers and if the condition is true or false");
             foreach (AnswerNode answer in possibleAnswers)
             {
                 if (IsAnswerConditionMet(answer, convo))
@@ -90,7 +91,7 @@ namespace DialogueSystem.Core
             }
 
             chosenAnswer = _weightedAnswers.Next();
-            Game.LogTrivial($"Adding all answers of {chosenAnswer.value} to weighted list");
+            Logger.logger.Log($"Adding all answers of {chosenAnswer.value} to weighted list");
             return chosenAnswer;
         }
 
@@ -99,12 +100,13 @@ namespace DialogueSystem.Core
             // If there's no condition, it's always met
             if (answerNode.condition == null)
             {
-                Game.LogTrivial($"{answerNode.condition} was null and defaulted to true.");
-
+                Logger.logger.Log($"{answerNode.value}'s condition was null and defaulted to true.");
                 return true;
             }
             bool val = answerNode.condition.Invoke();
-            Game.LogTrivial($"{answerNode.condition} was {val}");
+            Logger.logger.Log(
+                $"{answerNode.value}'s condition evaluated to {val}."
+            );
             return val;
         }
 

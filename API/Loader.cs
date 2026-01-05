@@ -1,6 +1,7 @@
 using System.IO;
 using DialogueSystem.Core;
 using DialogueSystem.Engine;
+using DialogueSystem.Logging;
 using DialogueSystem.UI;
 using Rage;
 using RAGENativeUI;
@@ -12,6 +13,7 @@ public static class Loader
     public static Conversation LoadDialogue(string filePath, UIMenu menu)
     {
         filePath = Path.Combine("Plugins/DialogueSystem", filePath);
+        Logger.logger = new Logger(filePath);
         if (!File.Exists(filePath))
         {
             throw new Exception("Dialogue file doesn't exist!");
@@ -25,7 +27,7 @@ public static class Loader
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error reading file {filePath}");
+            throw new Exception($"Error reading file {filePath} - {ex.Message}");
         }
         Graph graph = DialogueLoader.ParseGraphManually(jsonContent);
         return new Conversation(graph, menu, graph.nodesToStartConversation);

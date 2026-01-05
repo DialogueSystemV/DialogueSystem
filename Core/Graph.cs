@@ -9,6 +9,7 @@ namespace DialogueSystem.Core
         internal bool[,] adjList;
         internal bool[,] startingAdjList;
 
+
         /// <summary>
         /// GraphConfig that will allow to use variables in the questions and answers
         /// </summary>
@@ -25,82 +26,28 @@ namespace DialogueSystem.Core
         }
 
         /// <summary>
-        /// Adds a(n) link(edge) between the specified nodes
-        /// </summary>
-        public void LinkQuestions(QuestionNode fromNode, QuestionNode toNode)
-        {
-            AddEdge(new Edge(fromNode, toNode));
-        }
-
-        /// <summary>
-        /// Removes a(n) link(edge) between the specified nodes
-        /// </summary>
-        public void RemoveLink(QuestionNode fromNode, QuestionNode toNode)
-        {
-            RemoveEdge(new Edge(fromNode, toNode));
-        }
-
-        /// <summary>
-        /// Gets all connected questions from the specified node
-        /// </summary>
-        public List<QuestionNode> GetAllConnectedQuestionsFromNode(QuestionNode n)
-        {
-            return GetConnectedNodes(n);
-        }
-
-        /// <summary>
         /// Removes all links(edges) connected to the specified node
         /// </summary>
+        /// <param name="n">The node to remove all links from</param>
         public void RemoveAllLinksFromQuestion(QuestionNode n)
         {
-            int index = GetNodeIndexById(n.ID);
-            if (index == -1)
-            {
-                return;
-            }
-
+            int index = nodes.IndexOf(n);
             for (int i = 0; i < adjList.GetLength(1); i++)
             {
                 adjList[index, i] = false;
             }
         }
 
-        /// <summary>
-        /// Returns the index of a node based on its string ID
-        /// </summary>
-        internal int GetNodeIndexById(string id)
-        {
-            return nodes.FindIndex(n => n.ID == id);
-        }
 
         internal void AddEdge(Edge edge)
         {
-            int fromIndex = GetNodeIndexById(edge.from.ID);
-            int toIndex = GetNodeIndexById(edge.to.ID);
-
-            Rage.Game.LogTrivial(
-                $"[DialogueSystem][Graph:AddEdge] TRY | From='{edge.from?.value}' -> To='{edge.to?.value}' | " +
-                $"FromIndex={fromIndex} | ToIndex={toIndex} | AlreadyExists={edges.Contains(edge)}"
-            );
-
             if (!edges.Contains(edge))
             {
-                if (fromIndex == -1 || toIndex == -1)
-                {
-                    Rage.Game.LogTrivial(
-                        $"[DialogueSystem][Graph:AddEdge] FAILED | Invalid index | FromIndex={fromIndex} | ToIndex={toIndex}"
-                    );
-                    return;
-                }
-
-                adjList[fromIndex, toIndex] = true;
+                adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = true;
                 edges.Add(edge);
-
-                Rage.Game.LogTrivial(
-                    $"[DialogueSystem][Graph:AddEdge] ADDED | From='{edge.from.value}' -> To='{edge.to.value}'"
-                );
             }
         }
+
 
         internal void RemoveEdge(Edge edge)
         {
@@ -109,32 +56,8 @@ namespace DialogueSystem.Core
                 return;
             }
 
-            int fromIndex = GetNodeIndexById(edge.from.ID);
-            int toIndex = GetNodeIndexById(edge.to.ID);
-
-            if (fromIndex == -1 || toIndex == -1)
-            {
-                return;
-            }
-
-            adjList[fromIndex, toIndex] = false;
+            adjList[nodes.IndexOf(edge.to), nodes.IndexOf(edge.from)] = false;
             edges.Remove(edge);
-        }
-
-        internal void RemoveEdges(HashSet<Edge> edges)
-        {
-            foreach (Edge e in edges)
-            {
-                RemoveEdge(e);
-            }
-        }
-
-        internal void RemoveEdges(List<Edge> edges)
-        {
-            foreach (Edge e in edges)
-            {
-                RemoveEdge(e);
-            }
         }
 
         internal void AddEdges(List<Edge> edges)
@@ -156,14 +79,13 @@ namespace DialogueSystem.Core
 
         private bool AddNode(QuestionNode n, bool partOfList = false)
         {
-            if (nodes.Any(x => x.ID == n.ID))
+            if (nodes.Contains(n))
             {
                 return false;
             }
 
             nodes.Add(n);
             vars.ReplaceVariables(n);
-
             foreach (var na in n.possibleAnswers)
             {
                 vars.ReplaceVariables(na);
@@ -180,58 +102,32 @@ namespace DialogueSystem.Core
         private void RedoAdjList()
         {
             adjList = new bool[nodes.Count, nodes.Count];
-
             foreach (var edge in edges.ToList())
             {
-                int fromIndex = GetNodeIndexById(edge.from.ID);
-                int toIndex = GetNodeIndexById(edge.to.ID);
-
-                if (fromIndex != -1 && toIndex != -1)
-                {
-                    adjList[fromIndex, toIndex] = true;
-                }
+                int fromIndex = nodes.IndexOf(edge.from);
+                int toIndex = nodes.IndexOf(edge.to);
+                adjList[toIndex, fromIndex] = true;
             }
         }
-
-        private void RemoveNode(QuestionNode n)
-        {
-            int index = GetNodeIndexById(n.ID);
-            if (index == -1)
-            {
-                return;
-            }
-
-            nodes.RemoveAt(index);
-            edges.RemoveAll(e => e.from.ID == n.ID || e.to.ID == n.ID);
-            RedoAdjList();
-        }
-
+        
         internal List<QuestionNode> GetConnectedNodes(QuestionNode node)
         {
-            int fromIndex = GetNodeIndexById(node.ID);
-
-            Rage.Game.LogTrivial(
-                $"[DialogueSystem][Graph:GetConnectedNodes] Checking '{node?.value}' | NodeIndex={fromIndex}"
-            );
-
-            if (fromIndex == -1)
+            int colIndex = nodes.IndexOf(node);
+            if (colIndex == -1)
             {
+                // If the index is out of range, return an empty list
                 return new List<QuestionNode>();
             }
 
+            int colLength = adjList.GetLength(1);
             List<QuestionNode> result = new List<QuestionNode>();
-
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < colLength; i++)
             {
-                if (adjList[fromIndex, i])
+                if (adjList[i, colIndex])
                 {
                     result.Add(nodes[i]);
                 }
             }
-
-            Rage.Game.LogTrivial(
-                $"[DialogueSystem][Graph:GetConnectedNodes] Found {result.Count} connected nodes for '{node.value}'"
-            );
 
             return result;
         }
