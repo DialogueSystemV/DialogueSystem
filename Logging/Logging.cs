@@ -18,8 +18,7 @@ namespace DialogueSystem.Logging
         /// </summary>
         public Logger(string filePath)
         {
-            this.logFilePath = Path.Combine("Plugins/DialogueSystem", Path.ChangeExtension(filePath, ".log"));
-    
+            this.logFilePath = Path.ChangeExtension(filePath, ".log");
             Game.LogTrivial("Creating log at " + this.logFilePath);
     
             Logger.logger = this; // ✅ assign to self, not new Logger()
