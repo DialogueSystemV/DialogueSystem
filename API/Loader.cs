@@ -13,7 +13,8 @@ public static class Loader
     public static Conversation LoadDialogue(string filePath, UIMenu menu)
     {
         filePath = Path.Combine("Plugins/DialogueSystem", filePath);
-        Logger.logger = new Logger(filePath);
+        var loggingPath = Path.Combine("Plugins/DialogueSystem/Logs", filePath);
+        Logger.logger = new Logger(loggingPath);
         if (!File.Exists(filePath))
         {
             throw new Exception("Dialogue file doesn't exist!");

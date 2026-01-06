@@ -21,7 +21,7 @@ namespace DialogueSystem.Logging
             this.logFilePath = Path.ChangeExtension(filePath, ".log");
             Game.LogTrivial("Creating log at " + this.logFilePath);
     
-            Logger.logger = this; // ✅ assign to self, not new Logger()
+            Logger.logger = this;
             
             // Create directory if it doesn't exist
             string directory = Path.GetDirectoryName(filePath);
@@ -32,11 +32,14 @@ namespace DialogueSystem.Logging
             }
 
             // Create the file if it doesn't exist
-            if (!File.Exists(filePath))
+            if (File.Exists(filePath))
             {
-                Game.LogTrivial("Creating log file at " + filePath);
-                File.Create(filePath).Close();
+                Game.LogTrivial("Deleting old log file at " + filePath);
+                File.Delete(filePath);
             }
+            
+            Game.LogTrivial("Creating log file at " + filePath);
+            File.Create(filePath).Close();
 
             
             messageQueue = new BlockingCollection<string>();
